@@ -1,7 +1,7 @@
-# Awesheim — Design & Illustration
+# Awesheim — Illustration and design.
 
-Portfolio site. Images and short labels only; a big fixed wordmark with the
-work scrolling behind it and blurring out at the bottom of the page.
+Portfolio site. Images and short labels only, with the work scrolling
+behind a large fixed wordmark and blurring out at the bottom of the page.
 
 No build step, no dependencies. Open `index.html`, or serve the folder:
 
@@ -9,85 +9,108 @@ No build step, no dependencies. Open `index.html`, or serve the folder:
 npx http-server -p 8099
 ```
 
+## Source files in this repo
+
+- `index-old.html` — the original Claude Design export. It is a
+  self-unpacking bundle (React + a base64 payload), kept as reference.
+  The palette, logo placement, duotone treatment, progressive blur,
+  vertical labels, bottom nav and auto-drift in this build all come
+  from it.
+- `awesheim_logo_2013_hvit.ai` — the wordmark, kept as the vector
+  source. `images/awesheim-logo.svg` is extracted from it: eight paths,
+  ~1.3 KB, inlined into `index.html` so it can be recoloured with CSS
+  (`.masthead { color: … }`).
+
 ## How the scroll works
 
-The problem with a plain fixed/parallax scroll is that every image moves at
-the same rate, and the usual fix — one tall column of images — leaves big
-empty margins on wide screens.
+The original scattered a handful of absolutely positioned images at
+random speeds. That moves nicely, but it leaves wide screens mostly
+empty — and a single tall column has the same problem.
 
 This does it differently:
 
-1. The figures in `index.html` are distributed round-robin into 2–4 columns
-   (`columnsFor()` in `js/main.js`), so wide screens stay filled.
-2. The grid is `position: fixed`; an invisible `.scroll-spacer` gives the page
-   its scrollbar. Scrolling stays completely native — wheel, trackpad, touch,
-   keyboard, scrollbar drag, and browser find all behave normally. Nothing is
-   hijacked.
-3. **Each column travels exactly the distance its own content needs** to pass
-   through the viewport. A short column moves slower than a tall one, and
-   every column reaches the bottom at the same moment — so the speeds differ
-   but no column runs out early and leaves a hole.
+1. The figures in `index.html` are dealt round-robin into 1–3 columns
+   (`columnsFor()` in `js/main.js`), so the 1500px track fills edge to
+   edge at any width.
+2. The grid is `position: fixed`; an invisible `.scroll-spacer` gives
+   the page its scrollbar. Scrolling stays completely native — wheel,
+   trackpad, touch, keyboard, scrollbar drag and browser find all
+   behave normally. Nothing is hijacked.
+3. **Each column travels exactly the distance its own content needs** to
+   pass through the viewport. A short column moves slower than a tall
+   one, and every column reaches the bottom at the same moment — so the
+   speeds differ but no column runs out early and leaves a hole.
 4. On top of that, each column eases toward its target with its own lerp
-   factor, so they drift and settle at slightly different rates. That is what
-   makes it feel fluid rather than locked to the scrollbar.
+   factor, so they drift and settle at slightly different rates. That is
+   what makes it feel fluid rather than locked to the scrollbar.
 
-Because the travel distance is derived from measured column height, this holds
-for any number of images, any mix of portrait and landscape, and any column
+Because travel is derived from measured column height, this holds for
+any number of images, any mix of portrait and landscape, and any column
 count — nothing is hand-tuned per image.
 
-The easing is frame-rate independent, so it feels the same on a 60Hz and a
-120Hz display.
+Easing is frame-rate independent, so 60Hz and 120Hz feel the same.
+
+## Treatment
+
+- **Duotone.** Each piece renders through the `#duotone` SVG filter in
+  `index.html`, which flattens luminance onto the ramp from
+  `rgb(20,20,20)` to `rgb(102,102,102)` — the same ramp the original
+  computed on a canvas. Doing it as a filter avoids re-decoding every
+  image into a canvas, and works on whatever you drop in.
+- **Colour on the rise.** A second copy of each image sits on top and
+  fades in as the piece climbs the viewport, reaching 40% once it
+  reaches the top. Work is monochrome at the bottom of the page and
+  gains colour as it comes up.
+- **Progressive blur.** Six stacked `backdrop-filter` layers
+  (1–16px) masked from the bottom edge, plus a 30vh scrim.
+- **Auto-drift.** The page creeps at 0.15px/frame and pauses for 1.5s
+  whenever you scroll, then resumes. Set `DRIFT_SPEED = 0` in
+  `js/main.js` to switch it off.
 
 ## Adding your work
+
+The five images the original referenced (`assets/work-1…5`) were not in
+the repo, so `images/work-01…12.svg` are placeholders. Replace them.
 
 Drop files in `images/` and add a `<figure>` to `index.html`:
 
 ```html
 <figure>
-  <img src="images/my-piece.jpg" width="1200" height="1600" alt="Describe the piece">
-  <figcaption><span>13</span>Piece Title</figcaption>
+  <div class="frame">
+    <img class="duo" src="images/my-piece.jpg" width="1200" height="1600" alt="Describe the piece">
+    <img class="tint" src="images/my-piece.jpg" width="1200" height="1600" alt="" aria-hidden="true">
+  </div>
+  <span class="label">Piece Title <span class="sep">–</span> 2026</span>
 </figure>
 ```
 
-Set `width` and `height` to the real pixel dimensions. They reserve the right
-space before the image loads, which keeps the column measurements correct —
-without them the layout will shift as images arrive.
+Both `<img>` tags point at the same file — the browser fetches it once.
+Set `width` and `height` to the real pixel dimensions: they reserve the
+right space before the image loads, which keeps the column measurements
+correct. Without them the layout shifts as images arrive.
 
-Order in the HTML is the order they are dealt into columns, left to right.
-
-The twelve files currently in `images/` are placeholder SVGs. Replace them.
+Order in the HTML is the order pieces are dealt into columns.
 
 ## Tuning
 
 In `js/main.js`:
 
-- `STAGGER` — how far each column's top is offset, as a fraction of viewport
-  height. Bigger spread = more ragged, more editorial.
-- `EASE` — per-column smoothing. Lower is looser and more floaty, higher is
-  tighter. Keep the values different from each other; that difference is the
-  effect.
+- `STAGGER` — how far each column's top is offset, as a fraction of
+  viewport height. A wider spread reads more ragged and editorial.
+- `EASE` — per-column smoothing. Lower is looser and more floaty. Keep
+  the values different from each other; that difference *is* the effect.
+- `TINT_MAX` — how much colour the work regains at the top (0–1).
 - `columnsFor()` — the column-count breakpoints.
 
 In `css/style.css`:
 
-- `.blur-veil` — the progressive blur at the bottom, three stacked
-  `backdrop-filter` layers with soft masks. Change `height` for how far up it
-  reaches, and the `blur()` values for strength.
-- `.grid` `padding-top` — how much clear space the wordmark gets before the
-  work arrives.
-
-## The wordmark
-
-`.masthead` uses `mix-blend-mode: difference`, so the logo stays legible over
-anything that passes behind it — dark or light. The trade-off is that it
-inverts hue over saturated artwork. For a plain ink wordmark instead, drop
-`mix-blend-mode` and set `color: var(--ink)` on `.masthead` and
-`.contact-link` — legible over pale work, but it will disappear into dark
-images.
+- `.veil i` — the blur stack. `--b` is the blur radius, `--solid` and
+  `--fade` are the mask stops measured up from the bottom edge.
+- `.masthead` — logo size and position.
 
 ## Fallbacks
 
-- **No JavaScript** — the grid renders as ordinary CSS multi-columns and the
-  page scrolls normally.
-- **`prefers-reduced-motion`** — the fluid scroll is switched off and the same
-  static multi-column layout is used.
+- **No JavaScript** — the grid renders as ordinary CSS multi-columns and
+  the page scrolls normally.
+- **`prefers-reduced-motion`** — the fluid scroll and the auto-drift are
+  both switched off, and the work is shown in colour.

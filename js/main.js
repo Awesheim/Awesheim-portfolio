@@ -1,19 +1,24 @@
 /* ---------------------------------------------------------------
-   Awesheim — fluid multi-column parallax scroll
+   Awesheim — fluid multi-column scroll
 
-   How it works:
-   - The figures in index.html are distributed round-robin into
-     N columns (responsive: 2 / 3 / 4).
-   - The stage is fixed; an invisible spacer gives the page its
-     native scrollbar, so scrolling stays completely standard
-     (wheel, touch, keyboard, scrollbar).
-   - Each column travels exactly the distance its own content
-     needs to pass through the viewport, so short columns move
-     slower than tall ones and every column lands at the bottom
-     together — no dead space, any number of images per column.
-   - Each column eases toward its target with its own lerp factor,
-     which is what makes the motion fluid instead of locked 1:1
-     to the scrollbar.
+   The original design scattered a handful of absolutely positioned
+   images at random speeds. That moves nicely but leaves wide screens
+   mostly empty, so the layout here is columns instead:
+
+   - The figures are dealt round-robin into N columns (2/3/4 by width).
+   - The stage is fixed; an invisible spacer supplies the scrollbar,
+     so scrolling stays completely native.
+   - Each column travels exactly the distance its own content needs to
+     pass through the viewport. Short columns therefore move slower
+     than tall ones and every column lands at the bottom together —
+     different speeds, but no column runs out early leaving a gap.
+   - Each column then eases toward its target with its own lerp
+     factor, which is what makes the motion feel fluid rather than
+     locked to the scrollbar.
+
+   On top of that, each piece fades from the duotone ramp into colour
+   as it rises up the viewport, and the page drifts slowly on its own
+   until the visitor takes over.
    --------------------------------------------------------------- */
 
 (function () {
@@ -21,38 +26,51 @@
 
   var docEl = document.documentElement;
   var grid = document.getElementById("grid");
-  var footer = document.getElementById("footer");
   var spacer = document.querySelector(".scroll-spacer");
-  var tagline = document.querySelector(".tagline");
   var figures = Array.prototype.slice.call(grid.querySelectorAll("figure"));
 
   var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  // Per-column offsets (× viewport height) so tops start staggered,
+  // Per-column offsets (x viewport height) so tops start staggered,
   // and per-column easing so columns drift at slightly different rates.
-  // EASE values are "per 60fps frame" and get converted to a
-  // frame-rate independent factor below, so a 120Hz display feels
-  // identical to a 60Hz one.
+  // EASE values are "per 60fps frame" and are converted to a
+  // frame-rate independent factor below, so 120Hz matches 60Hz.
   var STAGGER = [0, 0.16, 0.06, 0.22];
   var EASE = [0.105, 0.16, 0.125, 0.185];
-  var FOOTER_EASE = 0.15;
+
+  // Colour mix the tint layer reaches once a piece is at the top,
+  // matching the original design's 0.4 blend toward the full image.
+  var TINT_MAX = 0.4;
+
+  var DRIFT_SPEED = 0.15;  // px per frame
+  var DRIFT_EASE = 0.04;
+  var DRIFT_RESUME_MS = 1500;
 
   var cols = [];
-  var travel = []; // distance each column must cover
-  var current = []; // eased positions
+  var items = [];   // { tint, col, offsetTop, shown }
+  var travel = [];
+  var current = [];
   var maxTravel = 1;
-  var footerCurrent = 0;
-  var footerHeight = 0;
   var colCount = 0;
   var viewport = 0;
+  var padTop = 0;
+  var staggers = [];
   var rafId = null;
   var lastTime = 0;
-  var primed = false; // first frame snaps into place instead of sliding
+  var primed = false;
 
+  var driftTarget = 0;
+  var driftCurrent = 0;
+  var driftAccum = 0;
+  var driftTimer = null;
+
+  // Fewer, larger columns: the 1500px track still fills edge to edge,
+  // so nothing is lost at the sides, but each piece stays big enough
+  // to carry the page on its own.
   function columnsFor(width) {
-    if (width < 620) return 2;
-    if (width < 1400) return 3;
-    return 4;
+    if (width < 620) return 1;
+    if (width < 1024) return 2;
+    return 3;
   }
 
   function build() {
@@ -69,29 +87,43 @@
       cols[i % colCount].appendChild(fig);
     });
     current = cols.map(function () { return 0; });
-    primed = false; // snap to the current scroll position on the next frame
+    primed = false;
     measure();
   }
 
   function measure() {
     var vh = window.innerHeight;
     viewport = vh;
-    var padTop = parseFloat(getComputedStyle(grid).paddingTop) || 0;
-    var endGap = vh * 0.14; // breathing room before the footer arrives
+    padTop = parseFloat(getComputedStyle(grid).paddingTop) || 0;
+    // Leave the logo and nav clear at the end of the run.
+    var endGap = vh * 0.36;
 
+    staggers = [];
     travel = cols.map(function (col, i) {
       var stagger = Math.round(vh * STAGGER[i % STAGGER.length]);
       col.style.marginTop = stagger + "px";
+      staggers.push(stagger);
       return Math.max(0, padTop + stagger + col.offsetHeight + endGap - vh);
     });
     maxTravel = Math.max(1, Math.max.apply(null, travel));
 
-    footerHeight = footer.offsetHeight;
-    spacer.style.height = Math.round(vh + maxTravel + footerHeight) + "px";
+    // Cache each piece's position so the colour fade never has to read
+    // layout back out of the DOM while we are writing transforms.
+    items = figures.map(function (fig) {
+      var col = fig.parentElement;
+      return {
+        tint: fig.querySelector(".tint"),
+        col: cols.indexOf(col),
+        offsetTop: fig.offsetTop,
+        shown: -1,
+      };
+    });
+
+    spacer.style.height = Math.round(vh + maxTravel) + "px";
   }
 
-  // Converts a "per 60fps frame" lerp factor into one for the real
-  // elapsed time, so the motion feels the same on 60Hz and 120Hz.
+  // Converts a "per 60fps frame" lerp factor to one for the real
+  // elapsed time, so the feel is identical at any refresh rate.
   function smoothing(ease, steps) {
     return 1 - Math.pow(1 - ease, steps);
   }
@@ -99,15 +131,14 @@
   function frame(now) {
     var elapsed = lastTime ? now - lastTime : 16.667;
     lastTime = now;
-    // Clamp so returning to a backgrounded tab doesn't jump.
+    // Clamp so returning to a backgrounded tab does not jump.
     var steps = Math.min(elapsed, 100) / 16.667;
 
     var scroll = window.scrollY || window.pageYOffset || 0;
     var progress = Math.min(scroll, maxTravel) / maxTravel;
-    var extra = Math.max(0, scroll - maxTravel); // footer reveal range
 
     for (var i = 0; i < cols.length; i++) {
-      var target = progress * travel[i] + extra;
+      var target = progress * travel[i];
       var next = primed
         ? current[i] + (target - current[i]) * smoothing(EASE[i % EASE.length], steps)
         : target;
@@ -116,26 +147,82 @@
       cols[i].style.transform = "translate3d(0," + -next.toFixed(2) + "px,0)";
     }
 
-    var footerNext = primed
-      ? footerCurrent + (extra - footerCurrent) * smoothing(FOOTER_EASE, steps)
-      : extra;
-    if (Math.abs(extra - footerNext) < 0.05) footerNext = extra;
-    footerCurrent = footerNext;
-    footer.style.transform = "translate3d(0," + -footerNext.toFixed(2) + "px,0)";
+    // Colour rises with the work: duotone at the bottom of the
+    // viewport, up to TINT_MAX once it reaches the top.
+    var startAt = viewport * 0.2;
+    for (var j = 0; j < items.length; j++) {
+      var it = items[j];
+      if (!it.tint || it.col < 0) continue;
+      var top = padTop + staggers[it.col] + it.offsetTop - current[it.col];
+      var amount = (startAt - top) / startAt;
+      amount = amount < 0 ? 0 : amount > 1 ? 1 : amount;
+      var opacity = Math.round(amount * TINT_MAX * 1000) / 1000;
+      if (opacity !== it.shown) {
+        it.tint.style.opacity = opacity;
+        it.shown = opacity;
+      }
+    }
 
-    // The small tagline is only legible against bare paper, so it
-    // retires once the work starts passing under the masthead.
-    var fade = 1 - Math.min(1, scroll / (viewport * 0.45));
-    tagline.style.opacity = (fade * fade).toFixed(3);
+    drift(steps, scroll);
 
     primed = true;
     rafId = requestAnimationFrame(frame);
   }
 
+  /* ------------------------------------------------------- drift */
+
+  function drift(steps, scroll) {
+    var atEnd = scroll >= maxTravel - 1;
+    var want = atEnd ? 0 : driftTarget;
+    driftCurrent += (want - driftCurrent) * smoothing(DRIFT_EASE, steps);
+    if (Math.abs(driftCurrent) < 0.01) {
+      driftCurrent = 0;
+      driftAccum = 0;
+      return;
+    }
+    // scrollBy() truncates sub-pixel deltas, so a 0.15px/frame drift
+    // would round away to nothing. Bank the fraction and spend it a
+    // whole pixel at a time; the column easing smooths the steps out.
+    driftAccum += driftCurrent * steps;
+    var whole = driftAccum > 0 ? Math.floor(driftAccum) : Math.ceil(driftAccum);
+    if (whole !== 0) {
+      window.scrollBy(0, whole);
+      driftAccum -= whole;
+    }
+  }
+
+  function pauseDrift() {
+    driftTarget = 0;
+    clearTimeout(driftTimer);
+    driftTimer = setTimeout(function () { driftTarget = DRIFT_SPEED; }, DRIFT_RESUME_MS);
+  }
+
+  var DRIFT_EVENTS = ["wheel", "touchstart", "pointerdown", "keydown"];
+
+  function startDrift() {
+    driftTarget = DRIFT_SPEED;
+    driftCurrent = 0;
+    DRIFT_EVENTS.forEach(function (ev) {
+      window.addEventListener(ev, pauseDrift, { passive: true });
+    });
+  }
+
+  function stopDrift() {
+    driftTarget = 0;
+    driftCurrent = 0;
+    clearTimeout(driftTimer);
+    DRIFT_EVENTS.forEach(function (ev) {
+      window.removeEventListener(ev, pauseDrift);
+    });
+  }
+
+  /* ------------------------------------------------ start / stop */
+
   function start() {
     docEl.classList.add("motion");
     build();
     lastTime = 0;
+    startDrift();
     if (rafId === null) rafId = requestAnimationFrame(frame);
   }
 
@@ -145,12 +232,16 @@
       cancelAnimationFrame(rafId);
       rafId = null;
     }
-    // restore natural flow
-    figures.forEach(function (fig) { grid.appendChild(fig); });
+    stopDrift();
+    // Restore natural flow, and show the work in colour.
+    figures.forEach(function (fig) {
+      var tint = fig.querySelector(".tint");
+      if (tint) tint.style.opacity = TINT_MAX;
+      grid.appendChild(fig);
+    });
     cols.forEach(function (col) { col.remove(); });
     cols = [];
-    footer.style.transform = "";
-    tagline.style.opacity = "";
+    items = [];
     spacer.style.height = "0px";
   }
 
@@ -159,11 +250,8 @@
     if (reducedMotion.matches) return;
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(function () {
-      if (columnsFor(window.innerWidth) !== colCount) {
-        build();
-      } else {
-        measure();
-      }
+      if (columnsFor(window.innerWidth) !== colCount) build();
+      else measure();
     }, 150);
   });
 
@@ -176,9 +264,7 @@
     reducedMotion.addEventListener("change", onMotionPreference);
   }
 
-  // SVG placeholders have intrinsic sizes from width/height attributes,
-  // but re-measure once everything has loaded to be safe (real photos,
-  // web fonts, etc.).
+  // Re-measure once fonts and any real photography have settled.
   window.addEventListener("load", function () {
     if (!reducedMotion.matches) measure();
   });

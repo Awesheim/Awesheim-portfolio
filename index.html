@@ -3,86 +3,151 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Awesheim — Design &amp; Illustration</title>
-<meta name="description" content="Awesheim is the freelance design and illustration practice of Olav Aasheim. Selected work in identity, illustration and print.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23efeae2'/%3E%3Ctext x='32' y='46' font-family='Helvetica,Arial,sans-serif' font-size='42' font-weight='700' text-anchor='middle' fill='%2323211c'%3EA%3C/text%3E%3C/svg%3E">
+<title>Awesheim — Illustration and design.</title>
+<meta name="description" content="Awesheim is the freelance illustration and design practice of Olav Aasheim. Selected work.">
+<meta name="theme-color" content="#1f1f1f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%231f1f1f'/%3E%3Ctext x='32' y='47' font-family='Helvetica,Arial,sans-serif' font-size='44' font-weight='700' text-anchor='middle' fill='%23fff'%3EA%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- Provides the native scrollbar range when the fluid scroll is active -->
+<!-- Duotone ramp: luminance mapped onto rgb(20,20,20) - rgb(102,102,102) -->
+<svg class="filter-defs" aria-hidden="true" focusable="false">
+  <filter id="duotone" color-interpolation-filters="sRGB">
+    <feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0
+                                         0.299 0.587 0.114 0 0
+                                         0.299 0.587 0.114 0 0
+                                         0     0     0     1 0"/>
+    <feComponentTransfer>
+      <feFuncR type="linear" slope="0.3216" intercept="0.0784"/>
+      <feFuncG type="linear" slope="0.3216" intercept="0.0784"/>
+      <feFuncB type="linear" slope="0.3216" intercept="0.0784"/>
+    </feComponentTransfer>
+  </filter>
+</svg>
+
+<!-- Gives the native scrollbar its range while the stage is fixed -->
 <div class="scroll-spacer" aria-hidden="true"></div>
 
 <div class="stage">
   <main class="grid" id="grid" aria-label="Selected work">
     <figure>
-      <img src="images/work-01.svg" width="900" height="1200" alt="Fjord Series I — screen print with slate circle over layered green ridges">
-      <figcaption><span>01</span>Fjord Series — I</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-01.svg" width="900" height="1200" alt="Fjord Series I — Screen print, slate circle over layered ridges">
+        <img class="tint" src="images/work-01.svg" width="900" height="1200" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Fjord Series I <span class="sep">–</span> 2024</span>
     </figure>
     <figure>
-      <img src="images/work-02.svg" width="960" height="1200" alt="Solstice poster — ochre sun above a terracotta arch">
-      <figcaption><span>02</span>Solstice Poster</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-02.svg" width="960" height="1200" alt="Solstice — Poster, ochre sun above a terracotta arch">
+        <img class="tint" src="images/work-02.svg" width="960" height="1200" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Solstice <span class="sep">–</span> 2024</span>
     </figure>
     <figure>
-      <img src="images/work-03.svg" width="1000" height="1000" alt="Pattern study — alternating solid and outlined circles">
-      <figcaption><span>03</span>Pattern Study</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-03.svg" width="1000" height="1000" alt="Pattern Study — Alternating solid and outlined circles">
+        <img class="tint" src="images/work-03.svg" width="1000" height="1000" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Pattern Study <span class="sep">–</span> 2023</span>
     </figure>
     <figure>
-      <img src="images/work-04.svg" width="800" height="1200" alt="Arch print — nested plum and cream archways under a small sun">
-      <figcaption><span>04</span>Arch — Print</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-04.svg" width="800" height="1200" alt="Arch — Print, nested archways under a small sun">
+        <img class="tint" src="images/work-04.svg" width="800" height="1200" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Arch <span class="sep">–</span> 2025</span>
     </figure>
     <figure>
-      <img src="images/work-05.svg" width="1200" height="900" alt="Highland silkscreen — overlapping mountain silhouettes and a terracotta sun">
-      <figcaption><span>05</span>Highland, Silkscreen</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-05.svg" width="1200" height="900" alt="Highland — Silkscreen, overlapping mountain silhouettes">
+        <img class="tint" src="images/work-05.svg" width="1200" height="900" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Highland <span class="sep">–</span> 2023</span>
     </figure>
     <figure>
-      <img src="images/work-06.svg" width="900" height="1200" alt="Echo cover art — concentric rings in ink, terracotta and slate">
-      <figcaption><span>06</span>Echo — Cover Art</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-06.svg" width="900" height="1200" alt="Echo — Cover art, concentric rings">
+        <img class="tint" src="images/work-06.svg" width="900" height="1200" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Echo <span class="sep">–</span> 2024</span>
     </figure>
     <figure>
-      <img src="images/work-07.svg" width="1000" height="1250" alt="Weave identity — horizontal terracotta and ink bars behind an ochre circle">
-      <figcaption><span>07</span>Weave Identity</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-07.svg" width="1000" height="1250" alt="Weave — Identity, horizontal bars behind a circle">
+        <img class="tint" src="images/work-07.svg" width="1000" height="1250" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Weave <span class="sep">–</span> 2025</span>
     </figure>
     <figure>
-      <img src="images/work-08.svg" width="1200" height="800" alt="Horizon editorial — ochre sun sinking into a slate sea with a wave line">
-      <figcaption><span>08</span>Horizon Editorial</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-08.svg" width="1200" height="800" alt="Horizon — Editorial, sun sinking into a slate sea">
+        <img class="tint" src="images/work-08.svg" width="1200" height="800" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Horizon <span class="sep">–</span> 2024</span>
     </figure>
     <figure>
-      <img src="images/work-09.svg" width="900" height="1200" alt="Signal zine — zigzag ink lines with a terracotta dot">
-      <figcaption><span>09</span>Signal Zine</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-09.svg" width="900" height="1200" alt="Signal — Zine, zigzag line work">
+        <img class="tint" src="images/work-09.svg" width="900" height="1200" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Signal <span class="sep">–</span> 2023</span>
     </figure>
     <figure>
-      <img src="images/work-10.svg" width="1000" height="1000" alt="Quadrant logo study — circle divided into four contrasting quarters">
-      <figcaption><span>10</span>Quadrant, Logo Study</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-10.svg" width="1000" height="1000" alt="Quadrant — Logo study, circle in four quarters">
+        <img class="tint" src="images/work-10.svg" width="1000" height="1000" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Quadrant <span class="sep">–</span> 2025</span>
     </figure>
     <figure>
-      <img src="images/work-11.svg" width="900" height="1150" alt="Spine book series — five tilted book spines in the studio palette">
-      <figcaption><span>11</span>Spine — Book Series</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-11.svg" width="900" height="1150" alt="Spine — Book series, five tilted spines">
+        <img class="tint" src="images/work-11.svg" width="900" height="1150" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Spine <span class="sep">–</span> 2024</span>
     </figure>
     <figure>
-      <img src="images/work-12.svg" width="1200" height="850" alt="Drift mural — stacked flowing wave lines">
-      <figcaption><span>12</span>Drift Mural</figcaption>
+      <div class="frame">
+        <img class="duo" src="images/work-12.svg" width="1200" height="850" alt="Drift — Mural, stacked flowing wave lines">
+        <img class="tint" src="images/work-12.svg" width="1200" height="850" alt="" aria-hidden="true">
+      </div>
+      <span class="label">Drift <span class="sep">–</span> 2025</span>
     </figure>
   </main>
 </div>
 
-<footer class="site-footer" id="footer">
-  <p class="footer-kicker">New projects, collaborations &amp; commissions</p>
-  <a class="footer-mail" href="mailto:aasheim.olav@gmail.com">aasheim.olav@gmail.com</a>
-  <p class="footer-note">© 2026 Awesheim — Design &amp; Illustration</p>
-</footer>
-
-<!-- Progressive blur at the bottom of the viewport -->
-<div class="blur-veil" aria-hidden="true">
-  <i class="v1"></i><i class="v2"></i><i class="v3"></i>
+<!-- Progressive blur, stacked from the bottom edge upward -->
+<div class="veil" aria-hidden="true">
+  <i style="--b:1px;  --solid:22.5%; --fade:32.5%"></i>
+  <i style="--b:2px;  --solid:17.5%; --fade:27.5%"></i>
+  <i style="--b:4px;  --solid:12.5%; --fade:22.5%"></i>
+  <i style="--b:7px;  --solid:7.5%;  --fade:17.5%"></i>
+  <i style="--b:11px; --solid:4%;    --fade:12.5%"></i>
+  <i style="--b:16px; --solid:0%;    --fade:7.5%"></i>
 </div>
+<div class="scrim" aria-hidden="true"></div>
 
-<header class="masthead">
-  <h1 class="logo">Awesheim</h1>
-  <p class="tagline">Design &amp; Illustration</p>
-</header>
+<h1 class="masthead">
+  <span class="visually-hidden">Awesheim</span>
+  <svg class="logo-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1522.447 406.581" role="img" aria-label="Awesheim" fill="currentColor">
+  <path transform="matrix(1,0,0,-1,477.46873,203.28922)" d="M0 0-34.604 49.421-85.654-23.486V97.964L-170.695-23.485V113.391H-227.389V-203.292L-142.348-81.843V-203.291Z"/>
+  <path transform="matrix(1,0,0,-1,553.7949,89.90152)" d="M0 0H-121.107L-41.721-113.387-121.107-226.773H158.785L119.088-170.08H-12.207L27.486-113.387-12.207-56.693H39.695Z"/>
+  <path transform="matrix(1,0,0,-1,879.9922,61.55481)" d="M0 0-39.697 56.693H-351.137L-112.957-283.467H-467.162L-506.859-340.16H-4.053L-242.23 0Z"/>
+  <path transform="matrix(1,0,0,-1,929.8711,231.63492)" d="M0 0 14.758-21.077 49.361 28.347-30.029 141.731H-99.24L-39.697 56.693H-108.904L-168.447 141.731H-237.656L-78.873-85.039H-9.664L-69.209 0Z"/>
+  <path transform="matrix(1,0,0,-1,69.209,316.674)" d="M0 0 95.838 136.869V0H152.531V316.674L-69.209 0Z"/>
+  <path transform="matrix(1,0,0,-1,1300.707,.00012207031)" d="M0 0V-121.449L-85.041 0V-316.682H-28.348V-179.805L56.693-301.254V-179.805L152.531-316.674H221.74Z"/>
+  <path transform="matrix(1,0,0,-1,1013.834,203.28821)" d="M0 0-79.387-113.387H88.447V-56.693H29.514L69.207 0 29.514 56.693H88.447V113.387H-79.387Z"/>
+  <path transform="matrix(1,0,0,-1,-71.7764,500.93083)" d="M1202.403 184.257H1259.096V411.028H1202.403Z"/>
+</svg>
+</h1>
 
-<a class="contact-link" href="mailto:aasheim.olav@gmail.com">Contact</a>
+<nav class="site-nav" aria-label="Primary">
+  <a href="#about">About</a>
+  <a href="mailto:aasheim.olav@gmail.com">Contact</a>
+  <a href="#shop">Shop</a>
+</nav>
 
 <script src="js/main.js"></script>
 </body>

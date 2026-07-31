@@ -1,27 +1,53 @@
 /* ---------------------------------------------------------------
-   Awesheim — portfolio
-   Fluid multi-column parallax: markup works without JS (CSS
-   columns + native scroll); with JS the .motion class switches the
-   stage to a fixed viewport driven by js/main.js.
+   Awesheim — Illustration and design.
+
+   Palette, logo placement, duotone ramp, progressive blur and
+   bottom nav follow the original design. The scroll itself is the
+   multi-column treatment described in the README.
+
+   The markup works without JS (CSS multi-columns + native scroll);
+   with JS the .motion class hands the stage over to js/main.js.
    --------------------------------------------------------------- */
 
 :root {
-  --paper: #efeae2;
-  --ink: #23211c;
-  --muted: #857d70;
-  --gap: clamp(18px, 3vw, 48px);
+  --bg: hsl(0, 0%, 12%);
+  --link: hsl(0, 0%, 80%);
+  --link-hover: hsl(0, 0%, 95%);
+  --label: hsl(0, 0%, 60%);
+  --gap: clamp(20px, 3vw, 48px);
+  --sans: "Miranda Sans", Helvetica, Arial, sans-serif;
 }
 
 * { box-sizing: border-box; }
 
 html, body {
   margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--link);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-::selection { background: var(--ink); color: var(--paper); }
+::selection { background: hsl(0, 0%, 90%); color: var(--bg); }
+
+.filter-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 /* ------------------------------------------------- scroll spacer */
 
@@ -41,192 +67,162 @@ html.motion .stage {
 /* --------------------------------------------------------- grid */
 
 .grid {
-  padding: 52vh 4vw 18vh;
+  padding: 24px;
+  max-width: 1500px;
+  margin: 0 auto;
 }
 
-/* No-JS / reduced-motion fallback: CSS multi-columns */
-.grid { columns: 2; column-gap: var(--gap); }
-@media (min-width: 620px) { .grid { columns: 3; } }
-@media (min-width: 1400px) { .grid { columns: 4; } }
+/* No-JS / reduced-motion fallback: plain CSS multi-columns */
+.grid { columns: 1; column-gap: var(--gap); }
+@media (min-width: 620px)  { .grid { columns: 2; } }
+@media (min-width: 1024px) { .grid { columns: 3; } }
 
 html.motion .grid {
   columns: auto;
   display: flex;
   align-items: flex-start;
   gap: var(--gap);
-  padding-bottom: 0;
+  /* Work starts at the top edge, as in the original design; the
+     column stagger supplies the ragged entry instead of dead space. */
+  padding: 24px 24px 0;
 }
 
 .col {
+  /* Positioned so each figure's offsetTop is measured against its own
+     column — the colour fade depends on that being column-relative. */
+  position: relative;
   flex: 1;
   min-width: 0;
   will-change: transform;
 }
 
 figure {
-  margin: 0 0 clamp(36px, 6vh, 72px);
+  position: relative;
+  margin: 0 0 clamp(40px, 7vh, 88px);
   break-inside: avoid;
 }
 
-figure img {
+.frame {
+  position: relative;
+  background: var(--bg);
+}
+
+.frame img {
   display: block;
   width: 100%;
   height: auto;
 }
 
-figcaption {
-  margin-top: 10px;
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
+/* Base layer: luminance flattened onto the dark duotone ramp. */
+.duo { filter: url(#duotone); }
+
+/* Colour layer, faded in as the piece rises up the viewport. */
+.tint {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  opacity: 0;
 }
 
-figcaption span {
-  margin-right: 0.9em;
-  color: var(--ink);
+/* --------------------------------------------------------- label */
+
+.label {
+  display: block;
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--label);
+  white-space: nowrap;
+}
+
+.label .sep { opacity: 0.7; }
+
+/* Under the fluid scroll the label sits vertically beside the piece.
+   Always to the right, so each gutter carries exactly one label and
+   neighbouring columns can never collide; the last column's label
+   sits in the track's own padding. */
+html.motion .label {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 6px);
+  margin-top: 0;
+  writing-mode: vertical-rl;
+}
+
+/* ---------------------------------------------------- blur veil */
+
+.veil { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+
+.veil i {
+  position: absolute;
+  inset: 0;
+  -webkit-backdrop-filter: blur(var(--b));
+  backdrop-filter: blur(var(--b));
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 var(--solid), transparent var(--fade));
+  mask-image: linear-gradient(to top, #000 0%, #000 var(--solid), transparent var(--fade));
+}
+
+.scrim {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30vh;
+  pointer-events: none;
+  z-index: 6;
+  background: linear-gradient(to top, hsla(0, 0%, 12%, 0.4), hsla(0, 0%, 12%, 0));
 }
 
 /* ----------------------------------------------------- masthead */
 
 .masthead {
   position: fixed;
-  top: clamp(18px, 4vh, 44px);
-  left: 0;
-  right: 0;
-  text-align: center;
-  z-index: 6;
-  pointer-events: none;
-  mix-blend-mode: difference;
-  color: #fff;
-}
-
-.logo {
+  bottom: 10vh;
+  left: 50%;
+  transform: translateX(-50%);
   margin: 0;
-  font-size: clamp(56px, 13vw, 190px);
-  font-weight: 700;
-  line-height: 0.9;
-  letter-spacing: -0.045em;
-  text-transform: uppercase;
-}
-
-.tagline {
-  margin: clamp(10px, 1.6vh, 18px) 0 0;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.42em;
-  text-indent: 0.42em; /* balance the trailing tracking */
-  text-transform: uppercase;
-}
-
-.contact-link {
-  position: fixed;
-  top: clamp(16px, 3vh, 32px);
-  right: clamp(16px, 3vw, 40px);
-  z-index: 7;
-  mix-blend-mode: difference;
-  color: #fff;
-  text-decoration: none;
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  padding-bottom: 3px;
-  border-bottom: 1px solid currentColor;
-}
-
-/* ---------------------------------------------------- blur veil */
-
-.blur-veil {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 30vh;
-  z-index: 4;
+  width: 75vw;
   pointer-events: none;
+  z-index: 10;
+  color: hsl(0, 0%, 100%);
 }
 
-.blur-veil i { position: absolute; inset: 0; }
-
-.blur-veil .v1 {
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 50%);
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 50%);
+.logo-mark {
+  display: block;
+  width: 100%;
+  max-height: 20vh;
+  height: auto;
 }
 
-.blur-veil .v2 {
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 40%, #000 78%);
-  mask-image: linear-gradient(to bottom, transparent 40%, #000 78%);
-}
+/* --------------------------------------------------------- nav */
 
-.blur-veil .v3 {
-  -webkit-backdrop-filter: blur(22px);
-  backdrop-filter: blur(22px);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 68%, #000 100%);
-  mask-image: linear-gradient(to bottom, transparent 68%, #000 100%);
-}
-
-/* soft wash of paper colour at the very bottom edge */
-.blur-veil::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(239, 234, 226, 0) 55%,
-    rgba(239, 234, 226, 0.55) 100%
-  );
-}
-
-/* ------------------------------------------------------- footer */
-
-.site-footer {
-  text-align: center;
-  padding: 12vh 6vw 8vh;
-}
-
-html.motion .site-footer {
+.site-nav {
   position: fixed;
-  top: 100vh;
-  left: 0;
-  right: 0;
-  z-index: 5;
-  will-change: transform;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  z-index: 10;
 }
 
-.footer-kicker {
-  margin: 0 0 2.2vh;
-  font-size: 11px;
-  letter-spacing: 0.3em;
+.site-nav a {
+  font-size: 14px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
-}
-
-.footer-mail {
-  display: inline-block;
-  color: var(--ink);
   text-decoration: none;
-  font-size: clamp(22px, 3.6vw, 44px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  border-bottom: 2px solid var(--ink);
-  padding-bottom: 4px;
+  color: var(--link);
 }
 
-.footer-mail:hover { opacity: 0.6; }
+.site-nav a:hover,
+.site-nav a:focus-visible { color: var(--link-hover); }
 
-.footer-note {
-  margin: 4vh 0 0;
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
+.site-nav a:nth-child(1) { justify-self: start; }
+.site-nav a:nth-child(2) { justify-self: center; }
+.site-nav a:nth-child(3) { justify-self: end; }
 
 @media (max-width: 620px) {
-  .grid { padding-top: 44vh; }
-  .blur-veil { height: 26vh; }
+  .masthead { bottom: 12vh; width: 84vw; }
+  .site-nav a { font-size: 12px; }
 }
