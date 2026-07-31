@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+<rect width="1000" height="1000" fill="#e6e0d3"/>
+<circle cx="140" cy="140" r="62" fill="#23211c"/>
+<circle cx="320" cy="140" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="500" cy="140" r="62" fill="#23211c"/>
+<circle cx="680" cy="140" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="860" cy="140" r="62" fill="#23211c"/>
+<circle cx="140" cy="320" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="320" cy="320" r="62" fill="#23211c"/>
+<circle cx="500" cy="320" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="680" cy="320" r="62" fill="#23211c"/>
+<circle cx="860" cy="320" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="140" cy="500" r="62" fill="#23211c"/>
+<circle cx="320" cy="500" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="500" cy="500" r="62" fill="#23211c"/>
+<circle cx="680" cy="500" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="860" cy="500" r="62" fill="#23211c"/>
+<circle cx="140" cy="680" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="320" cy="680" r="62" fill="#23211c"/>
+<circle cx="500" cy="680" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="680" cy="680" r="62" fill="#23211c"/>
+<circle cx="860" cy="680" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="140" cy="860" r="62" fill="#23211c"/>
+<circle cx="320" cy="860" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="500" cy="860" r="62" fill="#23211c"/>
+<circle cx="680" cy="860" r="62" fill="none" stroke="#c26a45" stroke-width="10"/>
+<circle cx="860" cy="860" r="62" fill="#23211c"/>
+</svg>

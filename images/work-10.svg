@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+<rect width="1000" height="1000" fill="#e6e0d3"/>
+<path d="M500 120 A380 380 0 0 1 880 500 L500 500 Z" fill="#c26a45"/>
+<path d="M500 880 A380 380 0 0 1 120 500 L500 500 Z" fill="#5c7386"/>
+<path d="M120 500 A380 380 0 0 1 500 120 L500 500 Z" fill="none" stroke="#23211c" stroke-width="12"/>
+<path d="M880 500 A380 380 0 0 1 500 880 L500 500 Z" fill="#d9a13f"/>
+</svg>

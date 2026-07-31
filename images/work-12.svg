@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="850" viewBox="0 0 1200 850">
+<rect width="1200" height="850" fill="#e9e3d5"/>
+<path d="M 60 140 Q 155.0 106 250 140 Q 345.0 174 440 140 Q 535.0 106 630 140 Q 725.0 174 820 140 Q 915.0 106 1010 140 Q 1075.0 174 1140 140" fill="none" stroke="#5c7386" stroke-width="18" stroke-linecap="round"/>
+<path d="M 60 228 Q 155.0 194 250 228 Q 345.0 262 440 228 Q 535.0 194 630 228 Q 725.0 262 820 228 Q 915.0 194 1010 228 Q 1075.0 262 1140 228" fill="none" stroke="#8a9a6b" stroke-width="18" stroke-linecap="round"/>
+<path d="M 60 316 Q 155.0 282 250 316 Q 345.0 350 440 316 Q 535.0 282 630 316 Q 725.0 350 820 316 Q 915.0 282 1010 316 Q 1075.0 350 1140 316" fill="none" stroke="#c26a45" stroke-width="18" stroke-linecap="round"/>
+<path d="M 60 404 Q 155.0 370 250 404 Q 345.0 438 440 404 Q 535.0 370 630 404 Q 725.0 438 820 404 Q 915.0 370 1010 404 Q 1075.0 438 1140 404" fill="none" stroke="#23211c" stroke-width="18" stroke-linecap="round"/>
+<path d="M 60 492 Q 155.0 458 250 492 Q 345.0 526 440 492 Q 535.0 458 630 492 Q 725.0 526 820 492 Q 915.0 458 1010 492 Q 1075.0 526 1140 492" fill="none" stroke="#5c7386" stroke-width="18" stroke-linecap="round"/>
+<path d="M 60 580 Q 155.0 546 250 580 Q 345.0 614 440 580 Q 535.0 546 630 580 Q 725.0 614 820 580 Q 915.0 546 1010 580 Q 1075.0 614 1140 580" fill="none" stroke="#8a9a6b" stroke-width="18" stroke-linecap="round"/>
+<path d="M 60 668 Q 155.0 634 250 668 Q 345.0 702 440 668 Q 535.0 634 630 668 Q 725.0 702 820 668 Q 915.0 634 1010 668 Q 1075.0 702 1140 668" fill="none" stroke="#c26a45" stroke-width="18" stroke-linecap="round"/>
+<path d="M 60 756 Q 155.0 722 250 756 Q 345.0 790 440 756 Q 535.0 722 630 756 Q 725.0 790 820 756 Q 915.0 722 1010 756 Q 1075.0 790 1140 756" fill="none" stroke="#23211c" stroke-width="18" stroke-linecap="round"/>
+</svg>

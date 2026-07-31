@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<rect width="1200" height="800" fill="#e9e3d5"/>
+<rect x="0" y="430" width="1200" height="370" fill="#5c7386"/>
+<circle cx="600" cy="430" r="230" fill="#d9a13f"/>
+<path d="M 80 640 Q 145.0 614 210 640 Q 275.0 666 340 640 Q 405.0 614 470 640 Q 535.0 666 600 640 Q 665.0 614 730 640 Q 795.0 666 860 640 Q 925.0 614 990 640 Q 1055.0 666 1120 640" fill="none" stroke="#f2ede2" stroke-width="14" stroke-linecap="round"/>
+</svg>
