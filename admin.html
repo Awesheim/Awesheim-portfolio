@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edit work — Awesheim</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<div class="wrap" id="gate" hidden>
+  <div class="gate">
+    <h1>Awesheim</h1>
+    <p class="sub">Enter the passphrase to edit.</p>
+    <form id="gate-form">
+      <input type="password" id="gate-input" autocomplete="current-password" aria-label="Passphrase">
+      <button class="primary" type="submit">Unlock</button>
+    </form>
+    <p class="status" id="gate-status"></p>
+    <p class="note">
+      This gate only hides the form. It is not security — anyone can read
+      the files directly. Protect this page at the host before putting
+      anything private behind it.
+    </p>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <h1>Edit work</h1>
+  <p class="sub">
+    Changes are kept in this browser until you export.
+    <a href="index.html">View site</a>
+  </p>
+
+  <div class="toolbar">
+    <button id="add">Add piece</button>
+    <button id="reload">Reload from content.json</button>
+    <button id="revert" class="danger">Discard local changes</button>
+  </div>
+
+  <div id="list"></div>
+
+  <details class="help">
+    <summary>How saving works</summary>
+    <p>
+      This is a static site with no server, so this page cannot write files
+      by itself. Edit here, then export and commit the two files it gives you:
+    </p>
+    <ul>
+      <li><code>content.json</code> — the content the site reads.</li>
+      <li><code>index.html</code> — the same content written into the markup,
+        so the page still shows your work with JavaScript disabled and search
+        engines see it without running scripts.</li>
+    </ul>
+    <p>
+      <strong>Images:</strong> picking a file records its name and dimensions
+      and previews it, but the file itself still has to be copied into the
+      <code>images/</code> folder and committed. A piece whose image is
+      missing is flagged in red.
+    </p>
+  </details>
+</div>
+
+<div class="bar" id="bar" hidden>
+  <span class="status" id="status">Loading…</span>
+  <span class="spacer"></span>
+  <button id="dl-json" class="primary">Download content.json</button>
+  <button id="dl-html">Download index.html</button>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

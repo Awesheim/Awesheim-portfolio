@@ -153,13 +153,22 @@ html.motion .label {
 
 .veil { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
 
+/* Each layer is clipped to the band it actually affects. backdrop-filter
+   costs in proportion to the area it covers, so stretching these across
+   the whole viewport (and masking most of it away) made the browser blur
+   six full screens every frame — the single biggest cause of scroll jank.
+   --h is the band height, --solid how far up that band stays fully
+   opaque before fading out. */
 .veil i {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--h);
   -webkit-backdrop-filter: blur(var(--b));
   backdrop-filter: blur(var(--b));
-  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 var(--solid), transparent var(--fade));
-  mask-image: linear-gradient(to top, #000 0%, #000 var(--solid), transparent var(--fade));
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 var(--solid), transparent 100%);
+  mask-image: linear-gradient(to top, #000 0%, #000 var(--solid), transparent 100%);
 }
 
 .scrim {
@@ -179,10 +188,13 @@ html.motion .label {
   position: fixed;
   bottom: 10vh;
   left: 50%;
-  /* --logo-y is driven by the scroll: it lifts the wordmark up to the
-     hero position at the top of the page and returns to 0 (this docked
-     position) as you scroll down. */
-  transform: translate(-50%, var(--logo-y, 0px));
+  /* --logo-y and --logo-scale are driven by the scroll: at the top the
+     wordmark is lifted to the hero position at full size, and it returns
+     to 0 / half size (this docked position) as you scroll down. The
+     origin is the bottom edge so shrinking keeps the wordmark sitting on
+     its docked line rather than drifting up off it. */
+  transform: translate(-50%, var(--logo-y, 0px)) scale(var(--logo-scale, 1));
+  transform-origin: 50% 100%;
   margin: 0;
   width: 75vw;
   pointer-events: none;
@@ -221,6 +233,23 @@ html.motion .label {
 .site-nav a:hover,
 .site-nav a:focus-visible { color: var(--link-hover); }
 
+.site-nav a.external {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.ext-icon {
+  width: 0.85em;
+  height: 0.85em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: square;
+  /* nudge off the cap height so it optically centres on the type */
+  margin-top: -0.1em;
+}
+
 .site-nav a:nth-child(1) { justify-self: start; }
 .site-nav a:nth-child(2) { justify-self: center; }
 .site-nav a:nth-child(3) { justify-self: end; }
@@ -229,3 +258,45 @@ html.motion .label {
   .masthead { bottom: 12vh; width: 84vw; }
   .site-nav a { font-size: 12px; }
 }
+
+/* ------------------------------------------- static pages (about) */
+
+.page {
+  min-height: 100vh;
+  padding: clamp(32px, 8vh, 96px) 24px 18vh;
+}
+
+.prose {
+  max-width: 62ch;
+  margin: 0 auto;
+}
+
+.prose-logo {
+  display: block;
+  width: min(340px, 60vw);
+  color: hsl(0, 0%, 100%);
+  margin-bottom: clamp(40px, 9vh, 96px);
+}
+
+.prose-logo svg { display: block; width: 100%; height: auto; }
+.prose-logo:hover { color: var(--link-hover); }
+
+.prose h1 {
+  margin: 0 0 1.4em;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+
+.prose p {
+  margin: 0 0 1.5em;
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.65;
+  color: var(--link);
+}
+
+.prose-back { font-size: 13px; }
+.prose-back a { color: var(--label); text-decoration: none; }
+.prose-back a:hover { color: var(--link-hover); }

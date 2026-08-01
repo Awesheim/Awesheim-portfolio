@@ -60,12 +60,15 @@ Easing is frame-rate independent, so 60Hz and 120Hz feel the same.
   fades in as the piece climbs the viewport, reaching 40% once it
   reaches the top. Work is monochrome at the bottom of the page and
   gains colour as it comes up.
-- **Progressive blur.** Six stacked `backdrop-filter` layers
-  (1–16px) masked from the bottom edge, plus a 30vh scrim.
-- **The wordmark descends.** At the top of the page it sits with its
-  centre 8% above the vertical middle; as you scroll it moves down,
-  reaching its docked position after one viewport height of scrolling
-  and staying there. It is tied straight to the scroll offset rather
+- **Progressive blur.** Four stacked `backdrop-filter` layers (2–18px)
+  plus a 30vh scrim. Each layer is clipped to the band it actually
+  affects — see *Performance* below.
+- **The wordmark descends and shrinks.** At the top of the page it sits
+  full size with its centre 8% above the vertical middle; as you scroll
+  it moves down and scales to 50%, reaching its docked position after
+  one viewport height of scrolling and staying there. It scales about
+  its bottom edge, so it stays on the docked line instead of drifting
+  up off it. It is tied straight to the scroll offset rather
   than eased, so it tracks the scrollbar exactly. The docked position
   is measured from the DOM, so the mobile breakpoint's different
   `bottom` value is picked up automatically.
@@ -75,29 +78,92 @@ The original also drifted the page on its own at 0.15px/frame, resuming
 fought touch scrolling on mobile. Nothing moves unless the visitor
 scrolls it.
 
+## Performance
+
+The scroll was janky, and an A/B of each effect found a single cause:
+the progressive blur. Every layer was `inset: 0`, so the browser blurred
+the **whole viewport** once per layer per frame, even though a mask hid
+all but a band at the bottom.
+
+Measured over a 4s continuous scroll, frames actually composited:
+
+| | before | after |
+|---|---|---|
+| desktop 1680×1000 | 1.3 fps | 12.3 fps |
+| mobile 390×780 | 14 fps | 60 fps |
+
+Mobile now matches a build with the blur removed entirely — it is free.
+Nothing else measured as significant: the duotone filter, the colour
+tint layer, the scrim and `will-change` were all within noise.
+
+Two things fixed it, and layer *count* mattered more than blur radius:
+
+1. Each `.veil i` is clipped to its own band (`height: var(--h)`,
+   anchored to the bottom) instead of covering the viewport.
+2. Six layers down to four.
+
+If it still feels heavy on an old machine, drop a layer — that is the
+lever with the most effect per unit of visual change.
+
 ## Adding your work
 
 The five images the original referenced (`assets/work-1…5`) were not in
 the repo, so `images/work-01…12.svg` are placeholders. Replace them.
 
-Drop files in `images/` and add a `<figure>` to `index.html`:
+**Use `admin.html`** — see *The CMS* below. It edits titles, years, alt
+text, ordering and images, and exports the files to commit.
 
-```html
-<figure>
-  <div class="frame">
-    <img class="duo" src="images/my-piece.jpg" width="1200" height="1600" alt="Describe the piece">
-    <img class="tint" src="images/my-piece.jpg" width="1200" height="1600" alt="" aria-hidden="true">
-  </div>
-  <span class="label">Piece Title <span class="sep">–</span> 2026</span>
-</figure>
+Content lives in `content.json`, which `index.html` reads at runtime.
+The same content is also written into `index.html` as plain `<figure>`
+markup between the `work:start` / `work:end` comments, so the page still
+works with JavaScript off and search engines see it without running
+scripts. Both come out of the CMS together, which is why they cannot
+drift apart. Do not hand-edit that block.
+
+Each piece uses the same file twice — once for the duotone layer, once
+for the colour layer — and the browser fetches it once. `width` and
+`height` are the real pixel dimensions; they reserve the right space
+before the image loads, which keeps the column measurements correct.
+
+## The CMS
+
+`admin.html` edits the work list: title, year, alt text, image, and
+order. Drafts are kept in this browser's localStorage as you type.
+
+Because the site is static and has no server, the page cannot write
+files. When you are done it gives you two downloads to commit:
+
+- `content.json` — what the site reads.
+- `index.html` — the same content written into the markup for the
+  no-JS fallback.
+
+Picking an image records its filename and reads its real dimensions,
+and previews it immediately — but **the file itself still has to be
+copied into `images/` and committed**. Pieces whose image is missing
+are flagged in red.
+
+Serve the folder over http (`npx http-server`) rather than opening
+`admin.html` off the filesystem, or the browser will refuse to read
+`content.json`.
+
+### Adding a password
+
+There is a gate stub at the top of `js/admin.js`. Set `ENABLED: true`
+and put the hex SHA-256 of your passphrase in `PASS_SHA256`:
+
+```
+echo -n 'your passphrase' | shasum -a 256
 ```
 
-Both `<img>` tags point at the same file — the browser fetches it once.
-Set `width` and `height` to the real pixel dimensions: they reserve the
-right space before the image loads, which keeps the column measurements
-correct. Without them the layout shifts as images arrive.
+Be clear about what that buys you: it hides the form and nothing else.
+`admin.html`, `js/admin.js` and `content.json` are still served to
+anyone who requests them, and the hash sits in the source to be attacked
+offline. It is a speed bump on a public URL, not access control.
 
-Order in the HTML is the order pieces are dealt into columns.
+For real protection, put HTTP auth in front of `admin.html` at the host
+— Netlify and Vercel both have password protection, or an `.htaccess`
+rule on classic hosting. Nothing on the published site links to
+`admin.html`, and it carries `noindex, nofollow`.
 
 ## Tuning
 
@@ -108,6 +174,7 @@ In `js/main.js`:
 - `EASE` — per-column smoothing. Lower is looser and more floaty. Keep
   the values different from each other; that difference *is* the effect.
 - `TINT_MAX` — how much colour the work regains at the top (0–1).
+- `LOGO_SCALE_END` — the size the wordmark shrinks to once docked.
 - `LOGO_RISE` — how far above the vertical centre the wordmark sits at
   the top of the page, as a fraction of viewport height (0.08 = 8%).
 - `LOGO_TRAVEL` — how many viewport heights of scrolling it takes for
@@ -119,6 +186,12 @@ In `css/style.css`:
 - `.veil i` — the blur stack. `--b` is the blur radius, `--solid` and
   `--fade` are the mask stops measured up from the bottom edge.
 - `.masthead` — logo size and position.
+
+## Pages
+
+- `index.html` — the work.
+- `about.html` — placeholder copy for now.
+- `admin.html` — the CMS, not linked from the site.
 
 ## Fallbacks
 

@@ -1,0 +1,177 @@
+/* ---------------------------------------------------------------
+   Awesheim — CMS styles. Utilitarian on purpose; this page is a tool,
+   not part of the site.
+   --------------------------------------------------------------- */
+
+:root {
+  --bg: hsl(0, 0%, 12%);
+  --panel: hsl(0, 0%, 16%);
+  --line: hsl(0, 0%, 26%);
+  --link: hsl(0, 0%, 80%);
+  --label: hsl(0, 0%, 60%);
+  --accent: hsl(28, 62%, 58%);
+  --danger: hsl(6, 55%, 56%);
+  --sans: "Miranda Sans", Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--link);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 120px; }
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.sub { margin: 0 0 28px; color: var(--label); font-size: 13px; }
+.sub a { color: var(--link); }
+
+/* ------------------------------------------------------ gate */
+
+.gate {
+  max-width: 380px;
+  margin: 18vh auto;
+  text-align: center;
+}
+
+.gate input { width: 100%; margin: 14px 0; }
+.gate .note { color: var(--label); font-size: 12px; margin-top: 18px; }
+
+/* ------------------------------------------------------ items */
+
+.item {
+  display: grid;
+  grid-template-columns: 132px 1fr auto;
+  gap: 18px;
+  padding: 18px;
+  margin-bottom: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.thumb {
+  width: 132px;
+  aspect-ratio: 1;
+  background: hsl(0, 0%, 10%);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.thumb img { max-width: 100%; max-height: 100%; display: block; }
+
+.thumb .missing {
+  color: var(--danger);
+  font-size: 11px;
+  text-align: center;
+  padding: 6px;
+}
+
+.fields { display: grid; gap: 10px; min-width: 0; }
+
+.row { display: grid; grid-template-columns: 1fr 110px; gap: 10px; }
+
+label { display: block; }
+
+label span {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--label);
+  margin-bottom: 4px;
+}
+
+input[type="text"], input[type="password"], input[type="number"] {
+  width: 100%;
+  padding: 8px 10px;
+  background: hsl(0, 0%, 10%);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--link);
+  font: inherit;
+  font-size: 13px;
+}
+
+input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+.side { display: flex; flex-direction: column; gap: 6px; }
+
+button {
+  padding: 7px 12px;
+  background: hsl(0, 0%, 22%);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--link);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+button:hover { background: hsl(0, 0%, 28%); }
+button:disabled { opacity: 0.35; cursor: default; }
+button.danger:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
+button.primary { background: var(--accent); border-color: var(--accent); color: hsl(0, 0%, 10%); font-weight: 700; }
+button.primary:hover { filter: brightness(1.1); }
+
+.filepick { font-size: 12px; color: var(--label); }
+.filepick input { font-size: 12px; max-width: 100%; }
+
+.hint { font-size: 11px; color: var(--label); }
+.hint.warn { color: var(--accent); }
+
+/* ------------------------------------------------------- bar */
+
+.bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 24px;
+  background: hsl(0, 0%, 9%);
+  border-top: 1px solid var(--line);
+}
+
+.bar .spacer { flex: 1; }
+.status { font-size: 12px; color: var(--label); }
+.status.ok { color: var(--accent); }
+
+.toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
+
+details.help {
+  margin: 26px 0 0;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+details.help summary { cursor: pointer; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--label); }
+details.help p, details.help li { font-size: 13px; color: var(--link); }
+details.help code { background: hsl(0, 0%, 10%); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+
+@media (max-width: 700px) {
+  .item { grid-template-columns: 1fr; }
+  .thumb { width: 100%; aspect-ratio: 16/9; }
+  .side { flex-direction: row; flex-wrap: wrap; }
+}

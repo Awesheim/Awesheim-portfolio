@@ -31,6 +31,7 @@
 
 <div class="stage">
   <main class="grid" id="grid" aria-label="Selected work">
+    <!-- work:start — generated from content.json by admin.html; do not hand-edit -->
     <figure>
       <div class="frame">
         <img class="duo" src="images/work-01.svg" width="900" height="1200" alt="Fjord Series I — Screen print, slate circle over layered ridges">
@@ -115,17 +116,17 @@
       </div>
       <span class="label">Drift <span class="sep">–</span> 2025</span>
     </figure>
+    <!-- work:end -->
   </main>
 </div>
 
-<!-- Progressive blur, stacked from the bottom edge upward -->
+<!-- Progressive blur. Each layer covers only its own band at the
+     bottom edge; see .veil i in the stylesheet for why that matters. -->
 <div class="veil" aria-hidden="true">
-  <i style="--b:1px;  --solid:22.5%; --fade:32.5%"></i>
-  <i style="--b:2px;  --solid:17.5%; --fade:27.5%"></i>
-  <i style="--b:4px;  --solid:12.5%; --fade:22.5%"></i>
-  <i style="--b:7px;  --solid:7.5%;  --fade:17.5%"></i>
-  <i style="--b:11px; --solid:4%;    --fade:12.5%"></i>
-  <i style="--b:16px; --solid:0%;    --fade:7.5%"></i>
+  <i style="--b:2px;  --h:30vh; --solid:60%"></i>
+  <i style="--b:5px;  --h:22vh; --solid:50%"></i>
+  <i style="--b:10px; --h:14vh; --solid:35%"></i>
+  <i style="--b:18px; --h:7vh;  --solid:0%"></i>
 </div>
 <div class="scrim" aria-hidden="true"></div>
 
@@ -144,9 +145,9 @@
 </h1>
 
 <nav class="site-nav" aria-label="Primary">
-  <a href="#about">About</a>
-  <a href="mailto:aasheim.olav@gmail.com">Contact</a>
-  <a href="#shop">Shop</a>
+  <a href="about.html">About</a>
+  <a href="mailto:olav@awesheim.no">Contact</a>
+  <a class="external" href="https://awesheim.no" target="_blank" rel="noopener noreferrer">Shop<svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5h10v10"/><path d="M19 5 8.5 15.5"/><path d="M16.5 19H5V7.5"/></svg><span class="visually-hidden"> (opens awesheim.no in a new tab)</span></a>
 </nav>
 
 <script src="js/main.js"></script>

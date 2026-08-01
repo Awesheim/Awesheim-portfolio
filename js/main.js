@@ -28,7 +28,9 @@
   var docEl = document.documentElement;
   var grid = document.getElementById("grid");
   var spacer = document.querySelector(".scroll-spacer");
-  var figures = Array.prototype.slice.call(grid.querySelectorAll("figure"));
+  // Populated at boot, either from content.json or from the markup
+  // already in index.html (which is the no-JS fallback).
+  var figures = [];
 
   var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -50,6 +52,8 @@
   // sync with the scrollbar.
   var LOGO_RISE = 0.08;
   var LOGO_TRAVEL = 1;
+  // Full size at the hero position, shrinking to this as it docks.
+  var LOGO_SCALE_END = 0.5;
 
   var cols = [];
   var items = [];   // { tint, col, offsetTop, shown }
@@ -131,6 +135,7 @@
     // cleared, so the rect read back is the docked one the CSS defines
     // (which differs between breakpoints).
     masthead.style.setProperty("--logo-y", "0px");
+    masthead.style.setProperty("--logo-scale", "1");
     var logoRect = masthead.getBoundingClientRect();
     logoOffset = vh * (0.5 - LOGO_RISE) - (logoRect.top + logoRect.height / 2);
     logoShown = null;
@@ -184,7 +189,9 @@
     var logoProgress = Math.min(1, scroll / Math.max(1, viewport * LOGO_TRAVEL));
     var logoY = Math.round(logoOffset * (1 - logoProgress) * 100) / 100;
     if (logoY !== logoShown) {
+      var logoScale = 1 + (LOGO_SCALE_END - 1) * logoProgress;
       masthead.style.setProperty("--logo-y", logoY + "px");
+      masthead.style.setProperty("--logo-scale", logoScale.toFixed(4));
       logoShown = logoY;
     }
 
@@ -217,6 +224,7 @@
     cols = [];
     items = [];
     masthead.style.setProperty("--logo-y", "0px");
+    masthead.style.setProperty("--logo-scale", String(LOGO_SCALE_END));
     logoShown = null;
     spacer.style.height = "0px";
   }
@@ -251,5 +259,50 @@
     if (!reducedMotion.matches) measure();
   });
 
-  onMotionPreference();
+  /* -------------------------------------------------------- boot */
+
+  function esc(v) {
+    return String(v == null ? "" : v)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  // Kept identical to the markup admin.html writes back into
+  // index.html, so the rendered page and the fallback never diverge.
+  function figureMarkup(item) {
+    var dim = "";
+    if (item.width && item.height) {
+      dim = ' width="' + esc(item.width) + '" height="' + esc(item.height) + '"';
+    }
+    var year = item.year ? ' <span class="sep">–</span> ' + esc(item.year) : "";
+    return '<figure>' +
+      '<div class="frame">' +
+      '<img class="duo" src="' + esc(item.src) + '"' + dim + ' alt="' + esc(item.alt) + '">' +
+      '<img class="tint" src="' + esc(item.src) + '"' + dim + ' alt="" aria-hidden="true">' +
+      '</div>' +
+      '<span class="label">' + esc(item.title) + year + '</span>' +
+      '</figure>';
+  }
+
+  function boot() {
+    figures = Array.prototype.slice.call(grid.querySelectorAll("figure"));
+    onMotionPreference();
+  }
+
+  // content.json is the source of truth. If it cannot be read — opened
+  // straight off the filesystem, say — the markup already in the page
+  // stands in for it.
+  if (window.fetch) {
+    fetch("content.json", { cache: "no-cache" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (data && Array.isArray(data.work) && data.work.length) {
+          grid.innerHTML = data.work.map(figureMarkup).join("");
+        }
+      })
+      .catch(function () { /* keep the markup in the page */ })
+      .then(boot, boot);
+  } else {
+    boot();
+  }
 })();
