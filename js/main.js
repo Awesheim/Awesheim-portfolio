@@ -53,7 +53,7 @@
   var LOGO_RISE = 0.08;
   var LOGO_TRAVEL = 1;
   // Full size at the hero position, shrinking to this as it docks.
-  var LOGO_SCALE_END = 0.5;
+  var LOGO_SCALE_END = 0.4;
 
   var cols = [];
   var items = [];   // { tint, col, offsetTop, shown }
@@ -70,6 +70,9 @@
   var lastWidth = 0;
   var lastHeight = 0;
   var masthead = document.querySelector(".masthead");
+  var aboutEl = document.querySelector(".about");
+  var aboutTravel = 0;   // scroll range spent revealing the about panel
+  var aboutShown = null;
   var logoOffset = 0;  // px to lift the wordmark by at scroll 0
   var logoShown = null;
 
@@ -140,7 +143,10 @@
     logoOffset = vh * (0.5 - LOGO_RISE) - (logoRect.top + logoRect.height / 2);
     logoShown = null;
 
-    spacer.style.height = Math.round(vh + maxTravel) + "px";
+    // The about panel is parked one screen down and slides up over its
+    // own stretch of scroll once the work has run out.
+    aboutTravel = aboutEl ? vh : 0;
+    spacer.style.height = Math.round(vh + maxTravel + aboutTravel) + "px";
   }
 
   // Converts a "per 60fps frame" lerp factor to one for the real
@@ -157,9 +163,12 @@
 
     var scroll = window.scrollY || window.pageYOffset || 0;
     var progress = Math.min(scroll, maxTravel) / maxTravel;
+    // Scrolling past the end of the work reveals the about panel; the
+    // columns keep rising by the same amount so the work clears out.
+    var extra = Math.max(0, Math.min(scroll - maxTravel, aboutTravel));
 
     for (var i = 0; i < cols.length; i++) {
-      var target = progress * travel[i];
+      var target = progress * travel[i] + extra;
       var next = primed
         ? current[i] + (target - current[i]) * smoothing(EASE[i % EASE.length], steps)
         : target;
@@ -195,6 +204,11 @@
       logoShown = logoY;
     }
 
+    if (aboutEl && extra !== aboutShown) {
+      aboutEl.style.transform = "translate3d(0," + -extra.toFixed(2) + "px,0)";
+      aboutShown = extra;
+    }
+
     primed = true;
     rafId = requestAnimationFrame(frame);
   }
@@ -226,6 +240,8 @@
     masthead.style.setProperty("--logo-y", "0px");
     masthead.style.setProperty("--logo-scale", String(LOGO_SCALE_END));
     logoShown = null;
+    if (aboutEl) aboutEl.style.transform = "";
+    aboutShown = null;
     spacer.style.height = "0px";
   }
 
@@ -258,6 +274,17 @@
   window.addEventListener("load", function () {
     if (!reducedMotion.matches) measure();
   });
+
+  // The about panel is not in normal flow while the fluid scroll is on,
+  // so an anchor jump would go nowhere. Scroll to the end instead.
+  var aboutLink = document.querySelector('.site-nav a[href="#about"]');
+  if (aboutLink) {
+    aboutLink.addEventListener("click", function (e) {
+      if (!docEl.classList.contains("motion")) return;  // plain anchor is fine
+      e.preventDefault();
+      window.scrollTo({ top: Math.round(maxTravel + aboutTravel), behavior: "smooth" });
+    });
+  }
 
   /* -------------------------------------------------------- boot */
 

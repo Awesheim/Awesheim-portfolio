@@ -11,6 +11,8 @@
 
 :root {
   --bg: hsl(0, 0%, 12%);
+  /* how far the docked wordmark sits above the bottom edge */
+  --logo-dock: 6vh;
   --link: hsl(0, 0%, 80%);
   --link-hover: hsl(0, 0%, 95%);
   --label: hsl(0, 0%, 60%);
@@ -186,11 +188,11 @@ html.motion .label {
 
 .masthead {
   position: fixed;
-  bottom: 10vh;
+  bottom: var(--logo-dock);
   left: 50%;
   /* --logo-y and --logo-scale are driven by the scroll: at the top the
      wordmark is lifted to the hero position at full size, and it returns
-     to 0 / half size (this docked position) as you scroll down. The
+     to 0 / LOGO_SCALE_END (this docked position) as you scroll down. The
      origin is the bottom edge so shrinking keeps the wordmark sitting on
      its docked line rather than drifting up off it. */
   transform: translate(-50%, var(--logo-y, 0px)) scale(var(--logo-scale, 1));
@@ -255,34 +257,47 @@ html.motion .label {
 .site-nav a:nth-child(3) { justify-self: end; }
 
 @media (max-width: 620px) {
-  .masthead { bottom: 12vh; width: 84vw; }
+  .masthead { width: 84vw; }
+  :root { --logo-dock: 8vh; }
   .site-nav a { font-size: 12px; }
 }
 
-/* ------------------------------------------- static pages (about) */
+/* ------------------------------------------------ about section */
 
-.page {
-  min-height: 100vh;
-  padding: clamp(32px, 8vh, 96px) 24px 18vh;
+/* In normal flow (no JS / reduced motion) this is simply the last
+   section of the page and the nav link is an ordinary anchor jump. */
+.about {
+  padding: 14vh 24px 22vh;
 }
 
-.prose {
+.about-inner {
   max-width: 62ch;
   margin: 0 auto;
 }
 
-.prose-logo {
-  display: block;
-  width: min(340px, 60vw);
-  color: hsl(0, 0%, 100%);
-  margin-bottom: clamp(40px, 9vh, 96px);
+/* Under the fluid scroll it is parked one screen below the fold and
+   slides up as the work clears out past the end of its travel. It sits
+   above the blur so the text stays crisp. */
+html.motion .about {
+  position: fixed;
+  top: 100vh;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  padding: 0;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  will-change: transform;
 }
 
-.prose-logo svg { display: block; width: 100%; height: auto; }
-.prose-logo:hover { color: var(--link-hover); }
+html.motion .about-inner {
+  width: 100%;
+  padding: 0 24px 26vh;
+}
 
-.prose h1 {
-  margin: 0 0 1.4em;
+.about h2 {
+  margin: 0 0 1.6em;
   font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.3em;
@@ -290,13 +305,18 @@ html.motion .label {
   color: var(--label);
 }
 
-.prose p {
+.about p {
   margin: 0 0 1.5em;
   font-size: clamp(15px, 1.4vw, 18px);
   line-height: 1.65;
   color: var(--link);
 }
 
-.prose-back { font-size: 13px; }
-.prose-back a { color: var(--label); text-decoration: none; }
-.prose-back a:hover { color: var(--link-hover); }
+.about-contact a {
+  color: var(--link);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+}
+
+.about-contact a:hover { color: var(--link-hover); }

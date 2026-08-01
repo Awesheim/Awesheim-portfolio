@@ -60,12 +60,12 @@ Easing is frame-rate independent, so 60Hz and 120Hz feel the same.
   fades in as the piece climbs the viewport, reaching 40% once it
   reaches the top. Work is monochrome at the bottom of the page and
   gains colour as it comes up.
-- **Progressive blur.** Four stacked `backdrop-filter` layers (2–18px)
+- **Progressive blur.** Three stacked `backdrop-filter` layers (3–20px)
   plus a 30vh scrim. Each layer is clipped to the band it actually
   affects — see *Performance* below.
 - **The wordmark descends and shrinks.** At the top of the page it sits
   full size with its centre 8% above the vertical middle; as you scroll
-  it moves down and scales to 50%, reaching its docked position after
+  it moves down and scales to 40%, reaching its docked position after
   one viewport height of scrolling and staying there. It scales about
   its bottom edge, so it stays on the docked line instead of drifting
   up off it. It is tied straight to the scroll offset rather
@@ -100,10 +100,34 @@ Two things fixed it, and layer *count* mattered more than blur radius:
 
 1. Each `.veil i` is clipped to its own band (`height: var(--h)`,
    anchored to the bottom) instead of covering the viewport.
-2. Six layers down to four.
+2. Six layers down to three.
 
-If it still feels heavy on an old machine, drop a layer — that is the
-lever with the most effect per unit of visual change.
+### Why layering at all
+
+CSS has no primitive for a blur whose radius varies across the element,
+so a progressive blur has to be built from layers. With a single layer
+you get the artifact this design was working around: a visible line
+where sharp content cross-fades into blurred content, reading as a
+ghosted double image rather than a gradual blur.
+
+What removes that artifact is **overlap, not layer count**. Each layer
+stays fully opaque for only the lower part of its band and fades out
+across the rest, so the next radius has faded in before the previous one
+ends and no single boundary carries a visible jump. Measured desktop fps
+against how it looks:
+
+| layers | fps | look |
+|---|---|---|
+| 1 | 24.7 | visible sharp-to-blurred edge |
+| 2 | 18.4 | slight step at the boundary |
+| **3** | **15.7** | **no visible artifact** |
+| 4 | 12.5 | no visible artifact |
+| 5 | 11.1 | no visible artifact |
+
+Three with generous overlap looks the same as six and costs half. On
+mobile every configuration now runs at 60fps, so layer count is purely a
+desktop concern. Promoting the layers with `translateZ(0)` was also
+tested and made no difference.
 
 ## Adding your work
 
@@ -175,6 +199,10 @@ In `js/main.js`:
   the values different from each other; that difference *is* the effect.
 - `TINT_MAX` — how much colour the work regains at the top (0–1).
 - `LOGO_SCALE_END` — the size the wordmark shrinks to once docked.
+
+In `css/style.css`:
+
+- `--logo-dock` — how far above the bottom edge the wordmark parks.
 - `LOGO_RISE` — how far above the vertical centre the wordmark sits at
   the top of the page, as a fraction of viewport height (0.08 = 8%).
 - `LOGO_TRAVEL` — how many viewport heights of scrolling it takes for
@@ -189,9 +217,14 @@ In `css/style.css`:
 
 ## Pages
 
-- `index.html` — the work.
-- `about.html` — placeholder copy for now.
+- `index.html` — the work, with the about text as a final section.
 - `admin.html` — the CMS, not linked from the site.
+
+The about text is a panel parked one screen below the fold; it slides up
+as the work runs out past the end of its travel, and sits above the blur
+so the type stays crisp. The nav's About button scrolls to it. Without
+JavaScript it is simply the last section of the page and the button is
+an ordinary anchor jump.
 
 ## Fallbacks
 

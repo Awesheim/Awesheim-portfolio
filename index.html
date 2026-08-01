@@ -120,13 +120,31 @@
   </main>
 </div>
 
-<!-- Progressive blur. Each layer covers only its own band at the
-     bottom edge; see .veil i in the stylesheet for why that matters. -->
+
+<section class="about" id="about" aria-label="About">
+  <div class="about-inner">
+    <h2>About</h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+    proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed
+    ut perspiciatis unde omnis iste natus error sit voluptatem.</p>
+    <p class="about-contact"><a href="mailto:olav@awesheim.no">olav@awesheim.no</a></p>
+  </div>
+</section>
+
+<!-- Progressive blur. Three layers, each clipped to its own band at
+     the bottom edge. What kills the hard sharp-to-blurred edge is the
+     overlap, not the layer count: every layer stays fully opaque for
+     only the lower part of its band and fades out across the rest, so
+     the next radius has already faded in before the previous one ends.
+     See .veil i in the stylesheet. -->
 <div class="veil" aria-hidden="true">
-  <i style="--b:2px;  --h:30vh; --solid:60%"></i>
-  <i style="--b:5px;  --h:22vh; --solid:50%"></i>
-  <i style="--b:10px; --h:14vh; --solid:35%"></i>
-  <i style="--b:18px; --h:7vh;  --solid:0%"></i>
+  <i style="--b:3px;  --h:34vh; --solid:45%"></i>
+  <i style="--b:9px;  --h:21vh; --solid:30%"></i>
+  <i style="--b:20px; --h:10vh; --solid:0%"></i>
 </div>
 <div class="scrim" aria-hidden="true"></div>
 
@@ -145,7 +163,7 @@
 </h1>
 
 <nav class="site-nav" aria-label="Primary">
-  <a href="about.html">About</a>
+  <a href="#about">About</a>
   <a href="mailto:olav@awesheim.no">Contact</a>
   <a class="external" href="https://awesheim.no" target="_blank" rel="noopener noreferrer">Shop<svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5h10v10"/><path d="M19 5 8.5 15.5"/><path d="M16.5 19H5V7.5"/></svg><span class="visually-hidden"> (opens awesheim.no in a new tab)</span></a>
 </nav>
