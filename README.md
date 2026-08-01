@@ -14,8 +14,7 @@ npx http-server -p 8099
 - `index-old.html` — the original Claude Design export. It is a
   self-unpacking bundle (React + a base64 payload), kept as reference.
   The palette, logo placement, duotone treatment, progressive blur,
-  vertical labels, bottom nav and auto-drift in this build all come
-  from it.
+  vertical labels and bottom nav in this build all come from it.
 - `awesheim_logo_2013_hvit.ai` — the wordmark, kept as the vector
   source. `images/awesheim-logo.svg` is extracted from it: eight paths,
   ~1.3 KB, inlined into `index.html` so it can be recoloured with CSS
@@ -63,9 +62,11 @@ Easing is frame-rate independent, so 60Hz and 120Hz feel the same.
   gains colour as it comes up.
 - **Progressive blur.** Six stacked `backdrop-filter` layers
   (1–16px) masked from the bottom edge, plus a 30vh scrim.
-- **Auto-drift.** The page creeps at 0.15px/frame and pauses for 1.5s
-  whenever you scroll, then resumes. Set `DRIFT_SPEED = 0` in
-  `js/main.js` to switch it off.
+
+The original also drifted the page on its own at 0.15px/frame, resuming
+1.5s after each interaction. That is deliberately not carried over — it
+fought touch scrolling on mobile. Nothing moves unless the visitor
+scrolls it.
 
 ## Adding your work
 
@@ -112,5 +113,5 @@ In `css/style.css`:
 
 - **No JavaScript** — the grid renders as ordinary CSS multi-columns and
   the page scrolls normally.
-- **`prefers-reduced-motion`** — the fluid scroll and the auto-drift are
-  both switched off, and the work is shown in colour.
+- **`prefers-reduced-motion`** — the fluid scroll is switched off and
+  the work is shown in colour.

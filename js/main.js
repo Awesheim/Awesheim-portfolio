@@ -17,8 +17,9 @@
      locked to the scrollbar.
 
    On top of that, each piece fades from the duotone ramp into colour
-   as it rises up the viewport, and the page drifts slowly on its own
-   until the visitor takes over.
+   as it rises up the viewport.
+
+   Scrolling is entirely the visitor's: nothing moves on its own.
    --------------------------------------------------------------- */
 
 (function () {
@@ -42,10 +43,6 @@
   // matching the original design's 0.4 blend toward the full image.
   var TINT_MAX = 0.4;
 
-  var DRIFT_SPEED = 0.15;  // px per frame
-  var DRIFT_EASE = 0.04;
-  var DRIFT_RESUME_MS = 1500;
-
   var cols = [];
   var items = [];   // { tint, col, offsetTop, shown }
   var travel = [];
@@ -58,11 +55,8 @@
   var rafId = null;
   var lastTime = 0;
   var primed = false;
-
-  var driftTarget = 0;
-  var driftCurrent = 0;
-  var driftAccum = 0;
-  var driftTimer = null;
+  var lastWidth = 0;
+  var lastHeight = 0;
 
   // Fewer, larger columns: the 1500px track still fills edge to edge,
   // so nothing is lost at the sides, but each piece stays big enough
@@ -94,6 +88,8 @@
   function measure() {
     var vh = window.innerHeight;
     viewport = vh;
+    lastWidth = window.innerWidth;
+    lastHeight = vh;
     padTop = parseFloat(getComputedStyle(grid).paddingTop) || 0;
     // Leave the logo and nav clear at the end of the run.
     var endGap = vh * 0.36;
@@ -163,57 +159,8 @@
       }
     }
 
-    drift(steps, scroll);
-
     primed = true;
     rafId = requestAnimationFrame(frame);
-  }
-
-  /* ------------------------------------------------------- drift */
-
-  function drift(steps, scroll) {
-    var atEnd = scroll >= maxTravel - 1;
-    var want = atEnd ? 0 : driftTarget;
-    driftCurrent += (want - driftCurrent) * smoothing(DRIFT_EASE, steps);
-    if (Math.abs(driftCurrent) < 0.01) {
-      driftCurrent = 0;
-      driftAccum = 0;
-      return;
-    }
-    // scrollBy() truncates sub-pixel deltas, so a 0.15px/frame drift
-    // would round away to nothing. Bank the fraction and spend it a
-    // whole pixel at a time; the column easing smooths the steps out.
-    driftAccum += driftCurrent * steps;
-    var whole = driftAccum > 0 ? Math.floor(driftAccum) : Math.ceil(driftAccum);
-    if (whole !== 0) {
-      window.scrollBy(0, whole);
-      driftAccum -= whole;
-    }
-  }
-
-  function pauseDrift() {
-    driftTarget = 0;
-    clearTimeout(driftTimer);
-    driftTimer = setTimeout(function () { driftTarget = DRIFT_SPEED; }, DRIFT_RESUME_MS);
-  }
-
-  var DRIFT_EVENTS = ["wheel", "touchstart", "pointerdown", "keydown"];
-
-  function startDrift() {
-    driftTarget = DRIFT_SPEED;
-    driftCurrent = 0;
-    DRIFT_EVENTS.forEach(function (ev) {
-      window.addEventListener(ev, pauseDrift, { passive: true });
-    });
-  }
-
-  function stopDrift() {
-    driftTarget = 0;
-    driftCurrent = 0;
-    clearTimeout(driftTimer);
-    DRIFT_EVENTS.forEach(function (ev) {
-      window.removeEventListener(ev, pauseDrift);
-    });
   }
 
   /* ------------------------------------------------ start / stop */
@@ -222,7 +169,6 @@
     docEl.classList.add("motion");
     build();
     lastTime = 0;
-    startDrift();
     if (rafId === null) rafId = requestAnimationFrame(frame);
   }
 
@@ -232,7 +178,6 @@
       cancelAnimationFrame(rafId);
       rafId = null;
     }
-    stopDrift();
     // Restore natural flow, and show the work in colour.
     figures.forEach(function (fig) {
       var tint = fig.querySelector(".tint");
@@ -248,6 +193,12 @@
   var resizeTimer = null;
   window.addEventListener("resize", function () {
     if (reducedMotion.matches) return;
+    // Mobile browsers fire resize as the address bar collapses and
+    // expands during a scroll. Re-measuring then would move the scroll
+    // range out from under the gesture and make the page lurch, so only
+    // react to a width change or a genuinely large height change.
+    if (window.innerWidth === lastWidth &&
+        Math.abs(window.innerHeight - lastHeight) < 150) return;
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(function () {
       if (columnsFor(window.innerWidth) !== colCount) build();
