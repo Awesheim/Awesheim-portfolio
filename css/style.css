@@ -179,7 +179,10 @@ html.motion .label {
   position: fixed;
   bottom: 10vh;
   left: 50%;
-  transform: translateX(-50%);
+  /* --logo-y is driven by the scroll: it lifts the wordmark up to the
+     hero position at the top of the page and returns to 0 (this docked
+     position) as you scroll down. */
+  transform: translate(-50%, var(--logo-y, 0px));
   margin: 0;
   width: 75vw;
   pointer-events: none;

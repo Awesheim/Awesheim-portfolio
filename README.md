@@ -62,6 +62,13 @@ Easing is frame-rate independent, so 60Hz and 120Hz feel the same.
   gains colour as it comes up.
 - **Progressive blur.** Six stacked `backdrop-filter` layers
   (1–16px) masked from the bottom edge, plus a 30vh scrim.
+- **The wordmark descends.** At the top of the page it sits with its
+  centre 8% above the vertical middle; as you scroll it moves down,
+  reaching its docked position after one viewport height of scrolling
+  and staying there. It is tied straight to the scroll offset rather
+  than eased, so it tracks the scrollbar exactly. The docked position
+  is measured from the DOM, so the mobile breakpoint's different
+  `bottom` value is picked up automatically.
 
 The original also drifted the page on its own at 0.15px/frame, resuming
 1.5s after each interaction. That is deliberately not carried over — it
@@ -101,6 +108,10 @@ In `js/main.js`:
 - `EASE` — per-column smoothing. Lower is looser and more floaty. Keep
   the values different from each other; that difference *is* the effect.
 - `TINT_MAX` — how much colour the work regains at the top (0–1).
+- `LOGO_RISE` — how far above the vertical centre the wordmark sits at
+  the top of the page, as a fraction of viewport height (0.08 = 8%).
+- `LOGO_TRAVEL` — how many viewport heights of scrolling it takes for
+  the wordmark to reach its docked position.
 - `columnsFor()` — the column-count breakpoints.
 
 In `css/style.css`:

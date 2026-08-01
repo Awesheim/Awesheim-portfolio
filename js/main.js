@@ -43,6 +43,14 @@
   // matching the original design's 0.4 blend toward the full image.
   var TINT_MAX = 0.4;
 
+  // At the top of the page the wordmark sits with its centre this far
+  // above the middle of the viewport, then descends to its docked
+  // position over LOGO_TRAVEL viewport heights of scrolling. It tracks
+  // the scroll position directly rather than easing, so it stays in
+  // sync with the scrollbar.
+  var LOGO_RISE = 0.08;
+  var LOGO_TRAVEL = 1;
+
   var cols = [];
   var items = [];   // { tint, col, offsetTop, shown }
   var travel = [];
@@ -57,6 +65,9 @@
   var primed = false;
   var lastWidth = 0;
   var lastHeight = 0;
+  var masthead = document.querySelector(".masthead");
+  var logoOffset = 0;  // px to lift the wordmark by at scroll 0
+  var logoShown = null;
 
   // Fewer, larger columns: the 1500px track still fills edge to edge,
   // so nothing is lost at the sides, but each piece stays big enough
@@ -115,6 +126,15 @@
       };
     });
 
+    // How far the wordmark has to rise from its docked position to sit
+    // LOGO_RISE above the vertical centre. Measured with the offset
+    // cleared, so the rect read back is the docked one the CSS defines
+    // (which differs between breakpoints).
+    masthead.style.setProperty("--logo-y", "0px");
+    var logoRect = masthead.getBoundingClientRect();
+    logoOffset = vh * (0.5 - LOGO_RISE) - (logoRect.top + logoRect.height / 2);
+    logoShown = null;
+
     spacer.style.height = Math.round(vh + maxTravel) + "px";
   }
 
@@ -159,6 +179,15 @@
       }
     }
 
+    // The wordmark descends from the hero position to its docked one,
+    // tied straight to the scroll offset rather than eased.
+    var logoProgress = Math.min(1, scroll / Math.max(1, viewport * LOGO_TRAVEL));
+    var logoY = Math.round(logoOffset * (1 - logoProgress) * 100) / 100;
+    if (logoY !== logoShown) {
+      masthead.style.setProperty("--logo-y", logoY + "px");
+      logoShown = logoY;
+    }
+
     primed = true;
     rafId = requestAnimationFrame(frame);
   }
@@ -187,6 +216,8 @@
     cols.forEach(function (col) { col.remove(); });
     cols = [];
     items = [];
+    masthead.style.setProperty("--logo-y", "0px");
+    logoShown = null;
     spacer.style.height = "0px";
   }
 
