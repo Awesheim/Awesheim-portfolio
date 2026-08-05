@@ -2,7 +2,7 @@
 // Nothing in here is specific to any one file: targets (sections/frames) and
 // color variables are discovered from whatever document the plugin runs in.
 
-figma.showUI(__html__, { width: 500, height: 680, themeColors: true });
+figma.showUI(__html__, { width: 500, height: 900, themeColors: true });
 
 var GRID_COLS = 8;
 var GRID_GAP = 16;
@@ -204,14 +204,27 @@ function nextFreeSpot(target) {
   return { x: GRID_PADDING, y: children.length ? bottom + GRID_GAP : GRID_PADDING };
 }
 
-// Recolor every filled/stroked shape in the SVG, binding the paint to the
-// chosen variable when one is set.
+// Recolor only the actual icon geometry (vectors/paths), binding the paint to
+// the chosen variable when one is set. Frames/groups from the SVG import are
+// left alone so the component's container never picks up a background fill.
+var PAINTABLE_TYPES = {
+  VECTOR: true,
+  BOOLEAN_OPERATION: true,
+  STAR: true,
+  ELLIPSE: true,
+  POLYGON: true,
+  RECTANGLE: true,
+  LINE: true
+};
+
 function applyPaint(node, variable) {
-  if ('fills' in node && Array.isArray(node.fills) && node.fills.length) {
-    node.fills = [makePaint(variable)];
-  }
-  if ('strokes' in node && Array.isArray(node.strokes) && node.strokes.length) {
-    node.strokes = [makePaint(variable)];
+  if (PAINTABLE_TYPES[node.type]) {
+    if ('fills' in node && Array.isArray(node.fills) && node.fills.length) {
+      node.fills = [makePaint(variable)];
+    }
+    if ('strokes' in node && Array.isArray(node.strokes) && node.strokes.length) {
+      node.strokes = [makePaint(variable)];
+    }
   }
   var children = node.children || [];
   for (var i = 0; i < children.length; i++) {

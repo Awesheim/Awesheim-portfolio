@@ -37,13 +37,13 @@
   }
   section {
     border-bottom: 1px solid var(--border);
-    padding: 10px 12px;
+    padding: 8px 12px;
     flex-shrink: 0;
   }
   h2 {
     font-size: 11px;
     font-weight: 600;
-    margin: 0 0 6px;
+    margin: 0 0 4px;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -95,9 +95,11 @@
   #search-count { color: var(--muted); font-size: 10px; margin-left: 6px; }
   #icon-grid {
     flex: 1;
+    min-height: 340px;
     overflow-y: auto;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+    align-content: start;
     gap: 6px;
     padding: 8px 12px;
   }
@@ -180,15 +182,73 @@
     min-height: 12px;
   }
   #status.error { color: #d32f2f; }
-  select.variable-select option.suggested { font-weight: 600; }
+
+  .dropdown { position: relative; }
+  .dropdown-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 11px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .dropdown-trigger .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dropdown-trigger .chevron { color: var(--muted); font-size: 9px; }
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    z-index: 20;
+    padding: 4px;
+  }
+  .dropdown-menu[hidden] { display: none; }
+  .dropdown-group-label {
+    font-size: 9.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 6px 6px 2px;
+  }
+  .dropdown-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .dropdown-option:hover, .dropdown-option.active { background: var(--tile-bg); }
+  .dropdown-option .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dropdown-option .badge { font-size: 9px; color: var(--accent); flex-shrink: 0; }
+
   .swatch {
     display: inline-block;
-    width: 9px;
-    height: 9px;
-    border-radius: 2px;
-    margin-right: 4px;
-    vertical-align: -1px;
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
     border: 1px solid rgba(0,0,0,0.15);
+  }
+  .swatch-none {
+    background:
+      linear-gradient(45deg, transparent 46%, var(--muted) 46%, var(--muted) 54%, transparent 54%),
+      var(--bg);
+  }
+  .swatch-unknown {
+    background: repeating-linear-gradient(45deg, var(--tile-bg), var(--tile-bg) 3px, var(--border) 3px, var(--border) 6px);
   }
 </style>
 </head>
@@ -258,17 +318,18 @@
 </section>
 
 <section id="color-section">
-  <h2>Color</h2>
+  <h2>Color &amp; naming</h2>
   <label class="field">
     <span class="field-name">Variable</span>
-    <select id="variable-select" class="variable-select">
-      <option value="">No color (keep default fill)</option>
-    </select>
+    <div class="dropdown" id="variable-dropdown">
+      <button type="button" id="variable-trigger" class="dropdown-trigger">
+        <span class="swatch swatch-none"></span>
+        <span class="name">No color (keep default fill)</span>
+        <span class="chevron">&#9662;</span>
+      </button>
+      <div id="variable-menu" class="dropdown-menu" hidden></div>
+    </div>
   </label>
-</section>
-
-<section id="naming-section">
-  <h2>Naming</h2>
   <label class="field">
     <span class="field-name">Component name prefix (optional)</span>
     <input type="text" id="prefix-input" placeholder="e.g. Icon/" />
@@ -318,7 +379,9 @@ var els = {
   gradeSelect: document.getElementById('grade-select'),
   sizeSelect: document.getElementById('size-select'),
   fillToggle: document.getElementById('fill-toggle'),
-  variableSelect: document.getElementById('variable-select'),
+  variableDropdown: document.getElementById('variable-dropdown'),
+  variableTrigger: document.getElementById('variable-trigger'),
+  variableMenu: document.getElementById('variable-menu'),
   prefixInput: document.getElementById('prefix-input'),
   iconSearch: document.getElementById('icon-search'),
   searchCount: document.getElementById('search-count'),
@@ -376,13 +439,52 @@ function renderTargets() {
   updateImportButton();
 }
 
+function makeSwatch(hex) {
+  var span = document.createElement('span');
+  if (hex) {
+    span.className = 'swatch';
+    span.style.background = hex;
+  } else {
+    span.className = 'swatch swatch-unknown';
+    span.title = 'Color not resolvable from here (library variable)';
+  }
+  return span;
+}
+
+function selectVariable(v) {
+  state.selectedVariable = v;
+  els.variableTrigger.innerHTML = '';
+  els.variableTrigger.appendChild(v ? makeSwatch(v.hex) : (function () {
+    var s = document.createElement('span');
+    s.className = 'swatch swatch-none';
+    return s;
+  })());
+  var nameSpan = document.createElement('span');
+  nameSpan.className = 'name';
+  nameSpan.textContent = v ? v.name : 'No color (keep default fill)';
+  els.variableTrigger.appendChild(nameSpan);
+  var chevron = document.createElement('span');
+  chevron.className = 'chevron';
+  chevron.innerHTML = '&#9662;';
+  els.variableTrigger.appendChild(chevron);
+  closeVariableMenu();
+}
+
 function renderVariables() {
-  var sel = els.variableSelect;
-  sel.innerHTML = '';
-  var noneOpt = document.createElement('option');
-  noneOpt.value = '';
-  noneOpt.textContent = 'No color (keep default fill)';
-  sel.appendChild(noneOpt);
+  var menu = els.variableMenu;
+  menu.innerHTML = '';
+
+  var noneRow = document.createElement('div');
+  noneRow.className = 'dropdown-option';
+  var noneSwatch = document.createElement('span');
+  noneSwatch.className = 'swatch swatch-none';
+  noneRow.appendChild(noneSwatch);
+  var noneName = document.createElement('span');
+  noneName.className = 'name';
+  noneName.textContent = 'No color (keep default fill)';
+  noneRow.appendChild(noneName);
+  noneRow.addEventListener('click', function () { selectVariable(null); });
+  menu.appendChild(noneRow);
 
   var groups = {};
   var order = [];
@@ -392,34 +494,53 @@ function renderVariables() {
   });
 
   var bestMatch = state.variables[0]; // pre-sorted by suggestion score on the plugin side
+
   order.forEach(function (groupName) {
-    var group = document.createElement('optgroup');
-    group.label = groupName;
+    var groupLabel = document.createElement('div');
+    groupLabel.className = 'dropdown-group-label';
+    groupLabel.textContent = groupName;
+    menu.appendChild(groupLabel);
+
     groups[groupName].forEach(function (v) {
-      var opt = document.createElement('option');
-      opt.value = JSON.stringify({ source: v.source, id: v.id, key: v.key, name: v.name });
-      opt.textContent = (v.hex ? v.hex + '  ' : '') + v.name;
+      var row = document.createElement('div');
+      row.className = 'dropdown-option';
+      row.appendChild(makeSwatch(v.hex));
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'name';
+      nameSpan.textContent = v.name;
+      row.appendChild(nameSpan);
       if (v === bestMatch) {
-        opt.textContent += '  (suggested)';
-        opt.className = 'suggested';
+        var badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = 'Suggested';
+        row.appendChild(badge);
       }
-      group.appendChild(opt);
+      row.addEventListener('click', function () { selectVariable(v); });
+      menu.appendChild(row);
     });
-    sel.appendChild(group);
   });
 
   if (bestMatch && isStrongSuggestion(bestMatch.name)) {
-    sel.value = JSON.stringify({ source: bestMatch.source, id: bestMatch.id, key: bestMatch.key, name: bestMatch.name });
-    state.selectedVariable = bestMatch;
+    selectVariable(bestMatch);
   } else {
-    sel.value = '';
-    state.selectedVariable = null;
+    selectVariable(null);
   }
 }
 
 function isStrongSuggestion(name) {
   return /icon/i.test(name) && /primary|default|main/i.test(name);
 }
+
+function closeVariableMenu() { els.variableMenu.hidden = true; }
+function toggleVariableMenu() { els.variableMenu.hidden = !els.variableMenu.hidden; }
+
+els.variableTrigger.addEventListener('click', function (e) {
+  e.stopPropagation();
+  toggleVariableMenu();
+});
+document.addEventListener('click', function (e) {
+  if (!els.variableDropdown.contains(e.target)) closeVariableMenu();
+});
 
 // ---------------------------------------------------------------------------
 // Settings controls
@@ -447,10 +568,6 @@ els.fillToggle.addEventListener('change', function () { state.fill = els.fillTog
 els.targetSelect.addEventListener('change', function () {
   state.selectedTargetId = els.targetSelect.value;
   updateImportButton();
-});
-
-els.variableSelect.addEventListener('change', function () {
-  state.selectedVariable = els.variableSelect.value ? JSON.parse(els.variableSelect.value) : null;
 });
 
 // ---------------------------------------------------------------------------
