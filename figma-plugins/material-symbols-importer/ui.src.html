@@ -1,0 +1,684 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: #e6e6e6;
+    --accent: #18a0fb;
+    --accent-fg: #ffffff;
+    --tile-bg: #f5f5f5;
+    --tile-selected: #e5f4ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #2c2c2c;
+      --fg: #f2f2f2;
+      --muted: #a3a3a3;
+      --border: #444444;
+      --tile-bg: #383838;
+      --tile-selected: #1c3a4f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 11px/1.4 Inter, "Segoe UI", sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  section {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    flex-shrink: 0;
+  }
+  h2 {
+    font-size: 11px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  label.field {
+    display: block;
+    margin-bottom: 6px;
+  }
+  label.field:last-child { margin-bottom: 0; }
+  .field-row { display: flex; gap: 8px; }
+  .field-row > label.field { flex: 1; }
+  .field-name {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  input[type="text"], input[type="search"], select {
+    width: 100%;
+    padding: 5px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 11px;
+  }
+  select { cursor: pointer; }
+  .segmented {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .segmented button {
+    flex: 1;
+    border: none;
+    background: var(--bg);
+    color: var(--fg);
+    padding: 5px 4px;
+    font-size: 10px;
+    cursor: pointer;
+    border-right: 1px solid var(--border);
+  }
+  .segmented button:last-child { border-right: none; }
+  .segmented button.active { background: var(--accent); color: var(--accent-fg); }
+  .toggle-row { display: flex; align-items: center; gap: 6px; }
+  .toggle-row input { margin: 0; }
+  #icon-search-section { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  #search-count { color: var(--muted); font-size: 10px; margin-left: 6px; }
+  #icon-grid {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+    gap: 6px;
+    padding: 8px 12px;
+  }
+  .icon-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 2px;
+    border-radius: 6px;
+    background: var(--tile-bg);
+    cursor: pointer;
+    border: 1px solid transparent;
+    user-select: none;
+  }
+  .icon-tile.selected { background: var(--tile-selected); border-color: var(--accent); }
+  .icon-tile .thumb {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-tile .thumb svg { width: 20px; height: 20px; fill: var(--fg); }
+  .icon-tile .thumb.loading { opacity: 0.25; }
+  .icon-tile .label {
+    font-size: 8.5px;
+    text-align: center;
+    line-height: 1.2;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+  #empty-state {
+    padding: 24px 12px;
+    text-align: center;
+    color: var(--muted);
+  }
+  #selection-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+  #selection-bar button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 10.5px;
+    padding: 0;
+  }
+  footer {
+    padding: 10px 12px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #import-btn {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border: none;
+    border-radius: 6px;
+    padding: 9px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #import-btn:disabled { opacity: 0.4; cursor: default; }
+  #status {
+    font-size: 10px;
+    color: var(--muted);
+    min-height: 12px;
+  }
+  #status.error { color: #d32f2f; }
+  select.variable-select option.suggested { font-weight: 600; }
+  .swatch {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    margin-right: 4px;
+    vertical-align: -1px;
+    border: 1px solid rgba(0,0,0,0.15);
+  }
+</style>
+</head>
+<body>
+
+<section id="target-section">
+  <h2>Import into</h2>
+  <div class="field-row">
+    <label class="field">
+      <span class="field-name">Frame or section</span>
+      <select id="target-select"></select>
+    </label>
+    <label class="field" style="flex: 0 0 64px;">
+      <span class="field-name">&nbsp;</span>
+      <select id="refresh-targets-btn" style="cursor:pointer;"><option>&#8635; Refresh</option></select>
+    </label>
+  </div>
+</section>
+
+<section id="style-section">
+  <h2>Icon settings</h2>
+  <label class="field">
+    <span class="field-name">Style</span>
+    <div class="segmented" id="style-seg">
+      <button data-value="outlined" class="active">Outlined</button>
+      <button data-value="rounded">Rounded</button>
+      <button data-value="sharp">Sharp</button>
+    </div>
+  </label>
+  <div class="field-row">
+    <label class="field">
+      <span class="field-name">Weight</span>
+      <select id="weight-select">
+        <option value="100">100 Thin</option>
+        <option value="200">200 Extra-light</option>
+        <option value="300">300 Light</option>
+        <option value="400" selected>400 Regular</option>
+        <option value="500">500 Medium</option>
+        <option value="600">600 Semibold</option>
+        <option value="700">700 Bold</option>
+      </select>
+    </label>
+    <label class="field">
+      <span class="field-name">Grade</span>
+      <select id="grade-select">
+        <option value="-25">Low (-25)</option>
+        <option value="0" selected>Default (0)</option>
+        <option value="200">High (200)</option>
+      </select>
+    </label>
+  </div>
+  <div class="field-row">
+    <label class="field">
+      <span class="field-name">Optical size</span>
+      <select id="size-select">
+        <option value="20">20px</option>
+        <option value="24" selected>24px</option>
+        <option value="40">40px</option>
+        <option value="48">48px</option>
+      </select>
+    </label>
+    <label class="field toggle-row" style="align-self: end; padding-bottom: 6px;">
+      <input type="checkbox" id="fill-toggle" />
+      <span class="field-name" style="margin: 0;">Filled</span>
+    </label>
+  </div>
+</section>
+
+<section id="color-section">
+  <h2>Color</h2>
+  <label class="field">
+    <span class="field-name">Variable</span>
+    <select id="variable-select" class="variable-select">
+      <option value="">No color (keep default fill)</option>
+    </select>
+  </label>
+</section>
+
+<section id="naming-section">
+  <h2>Naming</h2>
+  <label class="field">
+    <span class="field-name">Component name prefix (optional)</span>
+    <input type="text" id="prefix-input" placeholder="e.g. Icon/" />
+  </label>
+</section>
+
+<section id="icon-search-section">
+  <div style="padding: 10px 12px 6px;">
+    <input type="search" id="icon-search" placeholder="Search Material Symbols&hellip; (e.g. home, arrow, close)" />
+    <span id="search-count"></span>
+  </div>
+  <div id="icon-grid"></div>
+</section>
+
+<div id="selection-bar">
+  <span id="selection-count">0 icons selected</span>
+  <button id="clear-selection-btn">Clear</button>
+</div>
+
+<footer>
+  <button id="import-btn" disabled>Select icons to import</button>
+  <div id="status"></div>
+</footer>
+
+<script>
+var ICON_NAMES = /*__ICON_NAMES__*/[]/*__ICON_NAMES_END__*/;
+
+var state = {
+  style: 'outlined',
+  weight: '400',
+  grade: '0',
+  size: '24',
+  fill: false,
+  targets: [],
+  variables: [],
+  selectedTargetId: null,
+  selectedVariable: null, // { source, id?, key?, name }
+  selection: new Map(), // id -> label
+  svgCache: new Map() // url -> svg text (or 'ERROR')
+};
+
+var els = {
+  targetSelect: document.getElementById('target-select'),
+  refreshTargetsBtn: document.getElementById('refresh-targets-btn'),
+  styleSeg: document.getElementById('style-seg'),
+  weightSelect: document.getElementById('weight-select'),
+  gradeSelect: document.getElementById('grade-select'),
+  sizeSelect: document.getElementById('size-select'),
+  fillToggle: document.getElementById('fill-toggle'),
+  variableSelect: document.getElementById('variable-select'),
+  prefixInput: document.getElementById('prefix-input'),
+  iconSearch: document.getElementById('icon-search'),
+  searchCount: document.getElementById('search-count'),
+  iconGrid: document.getElementById('icon-grid'),
+  selectionCount: document.getElementById('selection-count'),
+  clearSelectionBtn: document.getElementById('clear-selection-btn'),
+  importBtn: document.getElementById('import-btn'),
+  status: document.getElementById('status')
+};
+
+// ---------------------------------------------------------------------------
+// Bootstrapping
+// ---------------------------------------------------------------------------
+
+parent.postMessage({ pluginMessage: { type: 'init' } }, '*');
+
+window.onmessage = function (event) {
+  var msg = event.data.pluginMessage;
+  if (!msg) return;
+  if (msg.type === 'init-data') {
+    state.targets = msg.targets;
+    state.variables = msg.variables;
+    state.selectedTargetId = msg.selectionTargetId;
+    renderTargets();
+    renderVariables();
+  } else if (msg.type === 'import-done') {
+    onImportDone(msg);
+  }
+};
+
+function renderTargets() {
+  var sel = els.targetSelect;
+  sel.innerHTML = '';
+  if (!state.targets.length) {
+    var opt = document.createElement('option');
+    opt.textContent = 'No frames or sections on this page';
+    opt.value = '';
+    sel.appendChild(opt);
+    sel.disabled = true;
+    updateImportButton();
+    return;
+  }
+  sel.disabled = false;
+  state.targets.forEach(function (t) {
+    var opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = (t.path ? t.path + ' / ' : '') + t.name + '  (' + t.kind + ')';
+    sel.appendChild(opt);
+  });
+  if (state.selectedTargetId && state.targets.some(function (t) { return t.id === state.selectedTargetId; })) {
+    sel.value = state.selectedTargetId;
+  } else {
+    state.selectedTargetId = sel.value;
+  }
+  updateImportButton();
+}
+
+function renderVariables() {
+  var sel = els.variableSelect;
+  sel.innerHTML = '';
+  var noneOpt = document.createElement('option');
+  noneOpt.value = '';
+  noneOpt.textContent = 'No color (keep default fill)';
+  sel.appendChild(noneOpt);
+
+  var groups = {};
+  var order = [];
+  state.variables.forEach(function (v) {
+    if (!groups[v.group]) { groups[v.group] = []; order.push(v.group); }
+    groups[v.group].push(v);
+  });
+
+  var bestMatch = state.variables[0]; // pre-sorted by suggestion score on the plugin side
+  order.forEach(function (groupName) {
+    var group = document.createElement('optgroup');
+    group.label = groupName;
+    groups[groupName].forEach(function (v) {
+      var opt = document.createElement('option');
+      opt.value = JSON.stringify({ source: v.source, id: v.id, key: v.key, name: v.name });
+      opt.textContent = (v.hex ? v.hex + '  ' : '') + v.name;
+      if (v === bestMatch) {
+        opt.textContent += '  (suggested)';
+        opt.className = 'suggested';
+      }
+      group.appendChild(opt);
+    });
+    sel.appendChild(group);
+  });
+
+  if (bestMatch && isStrongSuggestion(bestMatch.name)) {
+    sel.value = JSON.stringify({ source: bestMatch.source, id: bestMatch.id, key: bestMatch.key, name: bestMatch.name });
+    state.selectedVariable = bestMatch;
+  } else {
+    sel.value = '';
+    state.selectedVariable = null;
+  }
+}
+
+function isStrongSuggestion(name) {
+  return /icon/i.test(name) && /primary|default|main/i.test(name);
+}
+
+// ---------------------------------------------------------------------------
+// Settings controls
+// ---------------------------------------------------------------------------
+
+els.refreshTargetsBtn.addEventListener('mousedown', function (e) {
+  e.preventDefault();
+  parent.postMessage({ pluginMessage: { type: 'init' } }, '*');
+});
+
+Array.prototype.forEach.call(els.styleSeg.querySelectorAll('button'), function (btn) {
+  btn.addEventListener('click', function () {
+    Array.prototype.forEach.call(els.styleSeg.querySelectorAll('button'), function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    state.style = btn.getAttribute('data-value');
+    refreshVisibleThumbs();
+  });
+});
+
+els.weightSelect.addEventListener('change', function () { state.weight = els.weightSelect.value; refreshVisibleThumbs(); });
+els.gradeSelect.addEventListener('change', function () { state.grade = els.gradeSelect.value; refreshVisibleThumbs(); });
+els.sizeSelect.addEventListener('change', function () { state.size = els.sizeSelect.value; refreshVisibleThumbs(); });
+els.fillToggle.addEventListener('change', function () { state.fill = els.fillToggle.checked; refreshVisibleThumbs(); });
+
+els.targetSelect.addEventListener('change', function () {
+  state.selectedTargetId = els.targetSelect.value;
+  updateImportButton();
+});
+
+els.variableSelect.addEventListener('change', function () {
+  state.selectedVariable = els.variableSelect.value ? JSON.parse(els.variableSelect.value) : null;
+});
+
+// ---------------------------------------------------------------------------
+// Icon search + selection
+// ---------------------------------------------------------------------------
+
+var MAX_RESULTS = 90;
+var currentResults = [];
+
+function labelFor(id) {
+  return id.split('_').map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
+}
+
+function search(query) {
+  query = query.trim().toLowerCase().replace(/\s+/g, '_');
+  var matches;
+  if (!query) {
+    matches = ICON_NAMES.slice(0, MAX_RESULTS);
+  } else {
+    var starts = [];
+    var contains = [];
+    for (var i = 0; i < ICON_NAMES.length; i++) {
+      var name = ICON_NAMES[i];
+      if (name.indexOf(query) === 0) starts.push(name);
+      else if (name.indexOf(query) !== -1) contains.push(name);
+    }
+    matches = starts.concat(contains);
+  }
+  currentResults = matches;
+  els.searchCount.textContent = query
+    ? (matches.length + (matches.length === 1 ? ' match' : ' matches') + (matches.length > MAX_RESULTS ? ' (showing first ' + MAX_RESULTS + ')' : ''))
+    : (ICON_NAMES.length + ' icons — start typing to search');
+  renderGrid(matches.slice(0, MAX_RESULTS));
+}
+
+function renderGrid(names) {
+  els.iconGrid.innerHTML = '';
+  if (!names.length) {
+    var empty = document.createElement('div');
+    empty.id = 'empty-state';
+    empty.textContent = 'No icons match your search.';
+    els.iconGrid.appendChild(empty);
+    return;
+  }
+  names.forEach(function (id) {
+    var tile = document.createElement('div');
+    tile.className = 'icon-tile' + (state.selection.has(id) ? ' selected' : '');
+    tile.setAttribute('data-id', id);
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb loading';
+    tile.appendChild(thumb);
+
+    var label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = labelFor(id);
+    tile.appendChild(label);
+
+    tile.addEventListener('click', function () { toggleSelection(id, tile); });
+    els.iconGrid.appendChild(tile);
+
+    loadThumb(id, thumb);
+  });
+}
+
+function toggleSelection(id, tile) {
+  if (state.selection.has(id)) {
+    state.selection.delete(id);
+    tile.classList.remove('selected');
+  } else {
+    state.selection.set(id, labelFor(id));
+    tile.classList.add('selected');
+  }
+  updateSelectionBar();
+}
+
+function updateSelectionBar() {
+  var n = state.selection.size;
+  els.selectionCount.textContent = n + (n === 1 ? ' icon selected' : ' icons selected');
+  updateImportButton();
+}
+
+els.clearSelectionBtn.addEventListener('click', function () {
+  state.selection.clear();
+  Array.prototype.forEach.call(els.iconGrid.querySelectorAll('.icon-tile.selected'), function (t) { t.classList.remove('selected'); });
+  updateSelectionBar();
+});
+
+els.iconSearch.addEventListener('input', function () { search(els.iconSearch.value); });
+
+function updateImportButton() {
+  var n = state.selection.size;
+  var hasTarget = !!state.selectedTargetId;
+  els.importBtn.disabled = n === 0 || !hasTarget;
+  if (n === 0) els.importBtn.textContent = 'Select icons to import';
+  else if (!hasTarget) els.importBtn.textContent = 'Choose a target frame or section';
+  else els.importBtn.textContent = 'Import ' + n + (n === 1 ? ' icon' : ' icons');
+}
+
+// ---------------------------------------------------------------------------
+// SVG fetching (runs in the UI iframe, which has network access)
+// ---------------------------------------------------------------------------
+
+function assetUrl(id) {
+  var modifiers = '';
+  if (state.weight !== '400') modifiers += 'wght' + state.weight;
+  if (state.grade !== '0') modifiers += (state.grade[0] === '-' ? 'gradN' + state.grade.slice(1) : 'grad' + state.grade);
+  if (state.fill) modifiers += 'fill1';
+  var filename = modifiers ? id + '_' + modifiers + '_' + state.size + 'px.svg' : id + '_' + state.size + 'px.svg';
+  return 'https://raw.githubusercontent.com/google/material-design-icons/master/symbols/web/' +
+    id + '/materialsymbols' + state.style + '/' + filename;
+}
+
+function loadThumb(id, thumbEl) {
+  var url = assetUrl(id);
+  var cached = state.svgCache.get(url);
+  if (cached && cached !== 'ERROR') {
+    thumbEl.classList.remove('loading');
+    thumbEl.innerHTML = cached;
+    return;
+  }
+  if (cached === 'ERROR') {
+    thumbEl.classList.remove('loading');
+    thumbEl.textContent = '?';
+    return;
+  }
+  fetch(url).then(function (res) {
+    if (!res.ok) throw new Error('not found');
+    return res.text();
+  }).then(function (svg) {
+    state.svgCache.set(url, svg);
+    thumbEl.classList.remove('loading');
+    thumbEl.innerHTML = svg;
+  }).catch(function () {
+    state.svgCache.set(url, 'ERROR');
+    thumbEl.classList.remove('loading');
+    thumbEl.textContent = '?';
+  });
+}
+
+function refreshVisibleThumbs() {
+  Array.prototype.forEach.call(els.iconGrid.querySelectorAll('.icon-tile'), function (tile) {
+    var id = tile.getAttribute('data-id');
+    var thumb = tile.querySelector('.thumb');
+    thumb.classList.add('loading');
+    thumb.innerHTML = '';
+    loadThumb(id, thumb);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Import
+// ---------------------------------------------------------------------------
+
+els.importBtn.addEventListener('click', function () {
+  var ids = Array.from(state.selection.keys());
+  if (!ids.length || !state.selectedTargetId) return;
+
+  els.importBtn.disabled = true;
+  els.status.className = '';
+  els.status.textContent = 'Fetching ' + ids.length + ' icon' + (ids.length === 1 ? '' : 's') + '…';
+
+  var promises = ids.map(function (id) {
+    var url = assetUrl(id);
+    var cached = state.svgCache.get(url);
+    if (cached && cached !== 'ERROR') return Promise.resolve({ id: id, svg: cached });
+    return fetch(url).then(function (res) {
+      if (!res.ok) throw new Error('missing asset');
+      return res.text();
+    }).then(function (svg) {
+      state.svgCache.set(url, svg);
+      return { id: id, svg: svg };
+    }).catch(function () {
+      return { id: id, svg: null };
+    });
+  });
+
+  Promise.all(promises).then(function (results) {
+    var ok = results.filter(function (r) { return r.svg; });
+    var failed = results.filter(function (r) { return !r.svg; });
+    if (!ok.length) {
+      els.status.className = 'error';
+      els.status.textContent = 'Could not fetch any of the selected icons. Check your connection and try again.';
+      els.importBtn.disabled = false;
+      return;
+    }
+    var icons = ok.map(function (r) { return { name: state.selection.get(r.id) || labelFor(r.id), svg: r.svg }; });
+    var variable = state.selectedVariable
+      ? { source: state.selectedVariable.source, id: state.selectedVariable.id, key: state.selectedVariable.key }
+      : null;
+    els.status.textContent = failed.length
+      ? ('Fetched ' + ok.length + ', ' + failed.length + ' failed. Creating components…')
+      : ('Creating ' + ok.length + ' component' + (ok.length === 1 ? '' : 's') + '…');
+    parent.postMessage({ pluginMessage: {
+      type: 'import',
+      icons: icons,
+      options: {
+        size: parseInt(state.size, 10),
+        targetId: state.selectedTargetId,
+        variable: variable,
+        namePrefix: els.prefixInput.value || ''
+      }
+    } }, '*');
+  });
+});
+
+function onImportDone(msg) {
+  els.importBtn.disabled = false;
+  updateImportButton();
+  if (msg.errors && msg.errors.length) {
+    els.status.className = 'error';
+    els.status.textContent = msg.created + ' created, ' + msg.errors.length + ' failed: ' + msg.errors[0];
+  } else {
+    els.status.className = '';
+    els.status.textContent = msg.created + ' component' + (msg.created === 1 ? '' : 's') + ' imported successfully.';
+  }
+  if (msg.created > 0) {
+    state.selection.clear();
+    Array.prototype.forEach.call(els.iconGrid.querySelectorAll('.icon-tile.selected'), function (t) { t.classList.remove('selected'); });
+    updateSelectionBar();
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Initial render
+// ---------------------------------------------------------------------------
+
+search('');
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "Material Symbols Importer",
+  "id": "material-symbols-importer",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": [
+      "https://raw.githubusercontent.com"
+    ],
+    "reasoning": "Fetches individual Material Symbols icon SVGs from Google's official material-design-icons GitHub repository, parameterized by style/weight/fill/grade/optical size."
+  }
+}
