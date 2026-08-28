@@ -1,0 +1,13 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html",     "title": "A — Black Ledger",  "x": 0,    "y": 0, "w": 1440, "h": 2360 },
+    { "file": "Gatefold.dc.html", "title": "B — Gatefold Wall", "x": 1560, "y": 0, "w": 1440, "h": 2180 },
+    { "file": "Plate.dc.html",    "title": "C — Plate",         "x": 3120, "y": 0, "w": 1440, "h": 1880 }
+  ],
+  "annotations": [
+    { "id": "note-a", "x": 0, "y": -300, "w": 460, "text": "A — BLACK LEDGER\nThe archive. One plate, then work as a ruled index: year, client, scope, medium. Closest to your current site's restraint, and it reads as a practice with a back catalogue rather than a feed.\n\nTradeoff: the artwork is undersold above the fold. A band scanning for a look sees typography first." },
+    { "id": "note-b", "x": 1560, "y": -300, "w": 460, "text": "B — GATEFOLD WALL\nThe poster wall. Twelve plates edge to edge with no margins, condensed display type and one oxblood accent. You see the range in two seconds; the third tile shows the hover state.\n\nTradeoff: loud, and the pieces compete with each other. Weak work has nowhere to hide in a dense grid." },
+    { "id": "note-c", "x": 3120, "y": -300, "w": 460, "text": "C — PLATE\nOne piece at a time, set like liner notes: spec table, process crops, registration marks. Sells the craft and the print thinking to labels and art directors.\n\nTradeoff: slow to browse and it needs good scans of every stage — the most work to keep fed." }
+  ],
+  "launch": { "view": "canvas" }
+}

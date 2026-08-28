@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&amp;family=Archivo+Narrow:wght@400;500;600&amp;display=swap">
+  <style>
+    body { margin: 0; background: #0B0B0C; font-family: "Archivo Narrow", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    a { color: #E8E4DB; text-decoration: none; }
+    a:hover { color: #FFFFFF; }
+    .caps { font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: #6E6B66; }
+    .rule { height: 1px; background: rgba(232, 228, 219, 0.14); }
+    /* Engraved plate: a tick ring, a dashed ring and a halftone wash,
+       stacked on the same square. All CSS so every layer stays editable. */
+    .plate-layer { position: absolute; inset: 0; }
+    .ticks {
+      background: repeating-conic-gradient(from 0deg, #E8E4DB 0deg 0.28deg, transparent 0.28deg 5deg);
+      -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0 45.5%, #000 45.5% 48.5%, transparent 48.5%);
+      mask-image: radial-gradient(circle at 50% 50%, transparent 0 45.5%, #000 45.5% 48.5%, transparent 48.5%);
+      opacity: 0.55;
+    }
+    .halftone {
+      background-image: radial-gradient(#E8E4DB 0.9px, transparent 1.1px);
+      background-size: 7px 7px;
+      -webkit-mask-image: radial-gradient(circle at 50% 62%, #000 0 24%, transparent 42%);
+      mask-image: radial-gradient(circle at 50% 62%, #000 0 24%, transparent 42%);
+      opacity: 0.5;
+    }
+    .ledger-row:hover { background: rgba(232, 228, 219, 0.04); }
+  </style>
+</helmet>
+
+<div style="width: 1440px; background: #0B0B0C; color: #E8E4DB; padding-bottom: 88px">
+
+  <!-- masthead bar -->
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 56px 80px 0">
+    <svg viewBox="0 0 1522.447 406.581" style="width: 132px; height: auto; display: block; color: #E8E4DB" fill="currentColor" role="img" aria-label="Awesheim">
+      <path transform="matrix(1,0,0,-1,477.46873,203.28922)" d="M0 0-34.604 49.421-85.654-23.486V97.964L-170.695-23.485V113.391H-227.389V-203.292L-142.348-81.843V-203.291Z"/>
+      <path transform="matrix(1,0,0,-1,553.7949,89.90152)" d="M0 0H-121.107L-41.721-113.387-121.107-226.773H158.785L119.088-170.08H-12.207L27.486-113.387-12.207-56.693H39.695Z"/>
+      <path transform="matrix(1,0,0,-1,879.9922,61.55481)" d="M0 0-39.697 56.693H-351.137L-112.957-283.467H-467.162L-506.859-340.16H-4.053L-242.23 0Z"/>
+      <path transform="matrix(1,0,0,-1,929.8711,231.63492)" d="M0 0 14.758-21.077 49.361 28.347-30.029 141.731H-99.24L-39.697 56.693H-108.904L-168.447 141.731H-237.656L-78.873-85.039H-9.664L-69.209 0Z"/>
+      <path transform="matrix(1,0,0,-1,69.209,316.674)" d="M0 0 95.838 136.869V0H152.531V316.674L-69.209 0Z"/>
+      <path transform="matrix(1,0,0,-1,1300.707,.00012207031)" d="M0 0V-121.449L-85.041 0V-316.682H-28.348V-179.805L56.693-301.254V-179.805L152.531-316.674H221.74Z"/>
+      <path transform="matrix(1,0,0,-1,1013.834,203.28821)" d="M0 0-79.387-113.387H88.447V-56.693H29.514L69.207 0 29.514 56.693H88.447V113.387H-79.387Z"/>
+      <path transform="matrix(1,0,0,-1,-71.7764,500.93083)" d="M1202.403 184.257H1259.096V411.028H1202.403Z"/>
+    </svg>
+    <div class="caps">Illustration for heavy music</div>
+    <div style="display: flex; gap: 34px">
+      <a class="caps" style="color: #E8E4DB" href="#index">Index</a>
+      <a class="caps" style="color: #6E6B66" href="#about">About</a>
+      <a class="caps" style="color: #6E6B66" href="mailto:olav@awesheim.no">Contact</a>
+    </div>
+  </div>
+
+  <!-- statement -->
+  <div style="padding: 132px 80px 0; display: flex; justify-content: center">
+    <h1 style="margin: 0; max-width: 900px; text-align: center; font-family: 'Bodoni Moda', 'Didot', Georgia, serif; font-weight: 400; font-size: 62px; line-height: 1.16; letter-spacing: -0.005em; color: #E8E4DB; text-wrap: pretty">
+      Cover art, gatefolds and identity<br>for <em style="font-style: italic">heavy music</em>.
+    </h1>
+  </div>
+
+  <!-- single plate -->
+  <div style="padding: 96px 80px 0; display: flex; flex-direction: column; align-items: center; gap: 22px">
+    <div style="position: relative; width: 760px; height: 760px; background: #0B0B0C">
+      <div class="plate-layer ticks"></div>
+      <div class="plate-layer halftone"></div>
+      <svg class="plate-layer" viewBox="0 0 760 760" fill="none" stroke="#E8E4DB" aria-hidden="true">
+        <circle cx="380" cy="380" r="300" stroke-width="0.75" opacity="0.35"/>
+        <circle cx="380" cy="380" r="232" stroke-width="0.75" opacity="0.55" stroke-dasharray="2 9"/>
+        <path d="M380 148 L604 536 H156 Z" stroke-width="1" opacity="0.85"/>
+        <path d="M380 268 L524 496 H236 Z" stroke-width="0.75" opacity="0.4"/>
+        <path d="M156 536 L262 404 L318 470 L406 356 L470 438 L536 380 L604 536"
+              stroke-width="1.25" opacity="0.9" stroke-linejoin="round"/>
+        <path d="M188 566 H572" stroke-width="0.75" opacity="0.5"/>
+        <circle cx="380" cy="292" r="34" stroke-width="1" opacity="0.9"/>
+        <path d="M380 214 V 258 M380 326 V 370" stroke-width="1" opacity="0.6"/>
+        <path d="M302 292 H 346 M414 292 H 458" stroke-width="1" opacity="0.6"/>
+        <path d="M380 620 L364 650 H396 Z" stroke-width="0.75" opacity="0.7"/>
+      </svg>
+    </div>
+    <div class="caps" style="text-align: center">[Band name] <span style="opacity: 0.6">—</span> Gatefold LP <span style="opacity: 0.6">·</span> Ink on paper <span style="opacity: 0.6">·</span> 2025</div>
+  </div>
+
+  <!-- ledger -->
+  <div id="index" style="padding: 148px 80px 0">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 18px">
+      <div class="caps" style="color: #E8E4DB">Selected work</div>
+      <div class="caps">Client list on request</div>
+    </div>
+    <div class="rule"></div>
+
+    <div class="ledger-row" style="display: flex; align-items: baseline; gap: 24px; padding: 21px 4px; border-bottom: 1px solid rgba(232,228,219,0.14)">
+      <div class="caps" style="width: 64px; flex: none">2025</div>
+      <div style="width: 320px; flex: none; font-size: 17px; letter-spacing: 0.01em">[Band name]</div>
+      <div style="flex: 1; min-width: 0; font-size: 15px; color: #9C978F">Full gatefold illustration, inner sleeve and labels</div>
+      <div class="caps" style="width: 210px; flex: none; text-align: right">Ink on paper</div>
+    </div>
+    <div class="ledger-row" style="display: flex; align-items: baseline; gap: 24px; padding: 21px 4px; border-bottom: 1px solid rgba(232,228,219,0.14)">
+      <div class="caps" style="width: 64px; flex: none">2025</div>
+      <div style="width: 320px; flex: none; font-size: 17px; letter-spacing: 0.01em">[Band name]</div>
+      <div style="flex: 1; min-width: 0; font-size: 15px; color: #9C978F">Sigil, logo lockup and merch line</div>
+      <div class="caps" style="width: 210px; flex: none; text-align: right">Screen print, 2 colours</div>
+    </div>
+    <div class="ledger-row" style="display: flex; align-items: baseline; gap: 24px; padding: 21px 4px; border-bottom: 1px solid rgba(232,228,219,0.14)">
+      <div class="caps" style="width: 64px; flex: none">2024</div>
+      <div style="width: 320px; flex: none; font-size: 17px; letter-spacing: 0.01em">[Band name]</div>
+      <div style="flex: 1; min-width: 0; font-size: 15px; color: #9C978F">Cover and back panel, digipak layout</div>
+      <div class="caps" style="width: 210px; flex: none; text-align: right">Pencil, digital separation</div>
+    </div>
+    <div class="ledger-row" style="display: flex; align-items: baseline; gap: 24px; padding: 21px 4px; border-bottom: 1px solid rgba(232,228,219,0.14)">
+      <div class="caps" style="width: 64px; flex: none">2024</div>
+      <div style="width: 320px; flex: none; font-size: 17px; letter-spacing: 0.01em">[Band name]</div>
+      <div style="flex: 1; min-width: 0; font-size: 15px; color: #9C978F">Tour poster series, six dates</div>
+      <div class="caps" style="width: 210px; flex: none; text-align: right">Screen print, 3 colours</div>
+    </div>
+    <div class="ledger-row" style="display: flex; align-items: baseline; gap: 24px; padding: 21px 4px; border-bottom: 1px solid rgba(232,228,219,0.14)">
+      <div class="caps" style="width: 64px; flex: none">2024</div>
+      <div style="width: 320px; flex: none; font-size: 17px; letter-spacing: 0.01em">[Band name]</div>
+      <div style="flex: 1; min-width: 0; font-size: 15px; color: #9C978F">Type lockup and crest</div>
+      <div class="caps" style="width: 210px; flex: none; text-align: right">Vector, hand-drawn source</div>
+    </div>
+    <div class="ledger-row" style="display: flex; align-items: baseline; gap: 24px; padding: 21px 4px; border-bottom: 1px solid rgba(232,228,219,0.14)">
+      <div class="caps" style="width: 64px; flex: none">2023</div>
+      <div style="width: 320px; flex: none; font-size: 17px; letter-spacing: 0.01em">[Band name]</div>
+      <div style="flex: 1; min-width: 0; font-size: 15px; color: #9C978F">Cassette J-card and cover</div>
+      <div class="caps" style="width: 210px; flex: none; text-align: right">Ink, photocopy</div>
+    </div>
+    <div class="ledger-row" style="display: flex; align-items: baseline; gap: 24px; padding: 21px 4px; border-bottom: 1px solid rgba(232,228,219,0.14)">
+      <div class="caps" style="width: 64px; flex: none">2023</div>
+      <div style="width: 320px; flex: none; font-size: 17px; letter-spacing: 0.01em">[Band name]</div>
+      <div style="flex: 1; min-width: 0; font-size: 15px; color: #9C978F">Split release artwork, two panels</div>
+      <div class="caps" style="width: 210px; flex: none; text-align: right">Ink on paper</div>
+    </div>
+    <div class="ledger-row" style="display: flex; align-items: baseline; gap: 24px; padding: 21px 4px; border-bottom: 1px solid rgba(232,228,219,0.14)">
+      <div class="caps" style="width: 64px; flex: none">2023</div>
+      <div style="width: 320px; flex: none; font-size: 17px; letter-spacing: 0.01em">[Band name]</div>
+      <div style="flex: 1; min-width: 0; font-size: 15px; color: #9C978F">Festival identity and stage backdrop</div>
+      <div class="caps" style="width: 210px; flex: none; text-align: right">Vector, large format</div>
+    </div>
+    <div class="ledger-row" style="display: flex; align-items: baseline; gap: 24px; padding: 21px 4px; border-bottom: 1px solid rgba(232,228,219,0.14)">
+      <div class="caps" style="width: 64px; flex: none">2022</div>
+      <div style="width: 320px; flex: none; font-size: 17px; letter-spacing: 0.01em">[Band name]</div>
+      <div style="flex: 1; min-width: 0; font-size: 15px; color: #9C978F">Vinyl labels and inner sleeve</div>
+      <div class="caps" style="width: 210px; flex: none; text-align: right">Ink, two-colour offset</div>
+    </div>
+  </div>
+
+  <!-- about -->
+  <div id="about" style="padding: 132px 80px 0; display: flex; gap: 120px">
+    <div class="caps" style="width: 210px; flex: none">About</div>
+    <p style="margin: 0; max-width: 62ch; font-size: 18px; line-height: 1.7; color: #C9C4BB; text-wrap: pretty">
+      Awesheim is the illustration and design practice of Olav Aasheim. The work
+      is mostly for heavy music — cover art, gatefolds, sigils and the layout
+      that holds a record together. Drawn by hand, separated for print, and
+      built to survive being shrunk to a thumbnail and blown up to a backdrop.
+    </p>
+  </div>
+
+  <!-- footer -->
+  <div style="padding: 140px 80px 0">
+    <div class="rule" style="margin-bottom: 22px"></div>
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <a class="caps" style="color: #E8E4DB" href="mailto:olav@awesheim.no">olav@awesheim.no</a>
+      <a class="caps" style="color: #E8E4DB" href="https://awesheim.no">Shop ↗</a>
+      <div class="caps">© Awesheim</div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
