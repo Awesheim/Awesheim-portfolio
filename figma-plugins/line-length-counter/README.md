@@ -1,27 +1,47 @@
 # Line Length Counter
 
-A small Figma plugin that shows the longest line of text (by character count) in the current
-selection, live as you click around.
+A Figma plugin that shows the character count of the longest **wrapped** line of text in the
+current selection — live, as you drag a frame's width or click between layers.
 
 ## What it does
 
 Select a text layer, or a frame containing one or more text layers, and the plugin panel shows:
 
-- The character count of the longest line (split on hard line breaks — see limitation below).
-- Which text layer that line came from.
-- A preview of the line itself.
-- If the selection contains multiple text layers, a per-layer breakdown sorted longest-first.
+- The character count of the longest visually-wrapped line, and a preview of it.
+- Which text layer it came from.
+- Per text layer: its current width in px, font/size, line count, and a full line-by-line
+  breakdown with each line's character count (widest line highlighted).
 
-It updates automatically as your selection changes — no re-running needed.
+It updates live as you resize the frame or text box, or change the selection — no re-running
+needed.
+
+## How wrap-aware measurement works
+
+Figma's plugin API doesn't expose where a line visually wraps — that's purely a rendering detail.
+So this plugin reproduces Figma's own wrapping using Figma's own text engine as the ruler: it
+creates a hidden, locked scratch text node (named with a ⚠️ prefix so it's obviously not part of
+your design — the plugin removes it on close, but if a run ever crashes before that, it's safe to
+delete by hand), sets it to the same font, size, letter-spacing and case as your text, feeds it
+candidate substrings, and reads back the pixel width Figma itself renders. That reproduces the
+exact wrap points — kerning, shaping, everything — rather than approximating with a browser font.
+
+Word-wrap logic: text is split into paragraphs on hard line breaks (`\n`), then each paragraph is
+greedily packed word-by-word against the text layer's own width, breaking just before whatever
+word would first overflow — the same logic browsers and Figma use.
 
 ## Installing in Figma
 
 **Menu → Plugins → Development → Import plugin from manifest…** → pick `manifest.json` in this
 folder.
 
-## Limitation: hard line breaks only
+## Known limitations
 
-Figma's plugin API exposes a text layer's raw characters, including explicit line breaks (`\n`),
-but it does not expose where a line visually wraps due to auto-width/fixed-width containers —
-that's a rendering detail the API doesn't surface. "Longest line" here means the longest line
-between actual line breaks in the text content, not the longest visually-wrapped line.
+- **Uniform styling only.** If a text layer has more than one font/size/style mixed within it,
+  wrap-aware measurement is skipped for that layer (the panel says so) — reproducing per-run
+  mixed-style wrapping accurately is a lot more work than this needed to be.
+- **Auto-width text never wraps.** If a text layer's resizing is set to "Auto width," Figma
+  itself never wraps it regardless of frame size — the plugin reflects that (shows raw line
+  breaks) rather than pretending otherwise. Set the layer to "Auto height" or a fixed size to
+  get wrapping.
+- **Paragraph indent isn't modeled.** If a text layer has paragraph indentation set, the first
+  line's true available width is slightly narrower than what's used here — a minor edge case.
