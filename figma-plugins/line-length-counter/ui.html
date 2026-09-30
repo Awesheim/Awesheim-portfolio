@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: #e6e6e6;
+    --accent: #18a0fb;
+    --code-bg: #f5f5f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #2c2c2c;
+      --fg: #f2f2f2;
+      --muted: #a3a3a3;
+      --border: #444444;
+      --code-bg: #383838;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 11px/1.4 Inter, "Segoe UI", sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    padding: 14px;
+  }
+  #empty, #no-text {
+    color: var(--muted);
+    text-align: center;
+    padding: 30px 10px;
+  }
+  #result { display: none; }
+  #headline {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  #count {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent);
+  }
+  #count-label {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  #source {
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  #source b { color: var(--fg); font-weight: 600; }
+  #line-preview {
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+    font-size: 10.5px;
+    background: var(--code-bg);
+    border-radius: 4px;
+    padding: 6px 8px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 54px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+  #breakdown-label {
+    font-size: 9.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+  }
+  #breakdown { display: none; }
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3px 0;
+    border-top: 1px solid var(--border);
+    font-size: 10.5px;
+  }
+  .breakdown-row .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--fg);
+  }
+  .breakdown-row .len {
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div id="empty">Select a text layer, or a frame containing one.</div>
+<div id="no-text">No text layers found in the selection.</div>
+
+<div id="result">
+  <div id="headline">
+    <span id="count">0</span>
+    <span id="count-label">characters</span>
+  </div>
+  <div id="source">Longest line in <b id="source-name"></b></div>
+  <div id="line-preview"></div>
+  <div id="breakdown-label"></div>
+  <div id="breakdown"></div>
+</div>
+
+<script>
+var els = {
+  empty: document.getElementById('empty'),
+  noText: document.getElementById('no-text'),
+  result: document.getElementById('result'),
+  count: document.getElementById('count'),
+  sourceName: document.getElementById('source-name'),
+  linePreview: document.getElementById('line-preview'),
+  breakdownLabel: document.getElementById('breakdown-label'),
+  breakdown: document.getElementById('breakdown')
+};
+
+function showOnly(id) {
+  ['empty', 'no-text', 'result'].forEach(function (key) {
+    var el = key === 'no-text' ? els.noText : els[key];
+    el.style.display = (key === id) ? 'block' : 'none';
+  });
+}
+
+window.onmessage = function (event) {
+  var msg = event.data.pluginMessage;
+  if (!msg || msg.type !== 'result') return;
+
+  if (msg.state === 'empty') { showOnly('empty'); return; }
+  if (msg.state === 'no-text') { showOnly('no-text'); return; }
+
+  showOnly('result');
+  els.count.textContent = msg.best.length;
+  els.sourceName.textContent = msg.best.nodeName;
+  els.linePreview.textContent = msg.best.line || '(empty line)';
+
+  if (msg.textNodeCount > 1) {
+    els.breakdownLabel.style.display = 'block';
+    els.breakdownLabel.textContent = msg.textNodeCount + ' text layers in selection';
+    els.breakdown.style.display = 'block';
+    els.breakdown.innerHTML = '';
+    msg.perNode.forEach(function (n) {
+      var row = document.createElement('div');
+      row.className = 'breakdown-row';
+      var name = document.createElement('span');
+      name.className = 'name';
+      name.textContent = n.name;
+      var len = document.createElement('span');
+      len.className = 'len';
+      len.textContent = n.maxLen + ' chars';
+      row.appendChild(name);
+      row.appendChild(len);
+      els.breakdown.appendChild(row);
+    });
+  } else {
+    els.breakdownLabel.style.display = 'none';
+    els.breakdown.style.display = 'none';
+  }
+};
+
+showOnly('empty');
+</script>
+</body>
+</html>
