@@ -41,20 +41,43 @@
   }
   #error { color: #d32f2f; }
 
+  #full-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
   #headline-bar {
     flex-shrink: 0;
     padding: 14px 14px 10px;
     border-bottom: 1px solid var(--border);
     position: relative;
   }
-  #calculating {
+  #headline-toolbar {
     position: absolute;
-    top: 8px;
-    right: 10px;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #calculating {
     font-size: 9px;
     color: var(--muted);
     display: none;
   }
+  #minimize-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+    padding: 3px 6px;
+  }
+  #minimize-btn:hover { color: var(--fg); border-color: var(--muted); }
   #headline {
     display: flex;
     align-items: baseline;
@@ -136,17 +159,54 @@
     text-align: right;
   }
   .line-row.widest .len { color: var(--accent); font-weight: 600; }
+
+  #mini-view {
+    display: none;
+    align-items: center;
+    height: 24px;
+    padding: 0 6px 0 10px;
+    gap: 6px;
+  }
+  #mini-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 10.5px;
+  }
+  #mini-text b { font-weight: 600; }
+  #expand-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+    padding: 3px 6px;
+    flex-shrink: 0;
+  }
+  #expand-btn:hover { color: var(--fg); border-color: var(--muted); }
 </style>
 </head>
 <body>
 
+<div id="mini-view">
+  <span id="mini-text">No selection</span>
+  <button id="expand-btn" title="Expand">&#9633;</button>
+</div>
+
+<div id="full-view">
 <div id="empty">Select a text layer, or a frame containing one.</div>
 <div id="no-text">No text layers found in the selection.</div>
 <div id="error"></div>
 
-<div id="result" style="display: none; flex: 1; min-height: 0; display: none; flex-direction: column;">
+<div id="result" style="flex: 1; min-height: 0; display: none; flex-direction: column;">
   <div id="headline-bar">
-    <span id="calculating">Calculating&hellip;</span>
+    <div id="headline-toolbar">
+      <span id="calculating">Calculating&hellip;</span>
+      <button id="minimize-btn" title="Minimize">&#8211;</button>
+    </div>
     <div id="headline">
       <span id="count">0</span>
       <span id="count-label">characters — widest wrapped line</span>
@@ -156,9 +216,15 @@
   </div>
   <div id="node-list"></div>
 </div>
+</div>
 
 <script>
 var els = {
+  fullView: document.getElementById('full-view'),
+  miniView: document.getElementById('mini-view'),
+  miniText: document.getElementById('mini-text'),
+  expandBtn: document.getElementById('expand-btn'),
+  minimizeBtn: document.getElementById('minimize-btn'),
   empty: document.getElementById('empty'),
   noText: document.getElementById('no-text'),
   error: document.getElementById('error'),
@@ -169,6 +235,34 @@ var els = {
   linePreview: document.getElementById('line-preview'),
   nodeList: document.getElementById('node-list')
 };
+
+var minimized = false;
+
+function setMinimized(next) {
+  minimized = next;
+  els.fullView.style.display = minimized ? 'none' : 'flex';
+  els.miniView.style.display = minimized ? 'flex' : 'none';
+  parent.postMessage({ pluginMessage: { type: 'set-minimized', minimized: minimized } }, '*');
+}
+
+els.minimizeBtn.addEventListener('click', function () { setMinimized(true); });
+els.expandBtn.addEventListener('click', function () { setMinimized(false); });
+
+function updateMiniText(msg) {
+  if (msg.type === 'error') { els.miniText.textContent = 'Error measuring text'; return; }
+  if (msg.state === 'empty') { els.miniText.textContent = 'No selection'; return; }
+  if (msg.state === 'no-text') { els.miniText.innerHTML = '<b>' + escapeHtml(msg.selectionLabel) + '</b>: no text'; return; }
+  if (msg.state === 'ok') {
+    var count = msg.best ? (msg.best.length + ' characters') : '—';
+    els.miniText.innerHTML = '<b>' + escapeHtml(msg.selectionLabel) + '</b>: ' + count;
+  }
+}
+
+function escapeHtml(s) {
+  var div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
 
 var PANELS = ['empty', 'no-text', 'error', 'result'];
 
@@ -241,11 +335,13 @@ window.onmessage = function (event) {
   if (msg.type === 'error') {
     showOnly('error');
     els.error.textContent = msg.message;
+    updateMiniText(msg);
     return;
   }
   if (msg.type !== 'result') return;
 
   els.calculating.style.display = 'none';
+  updateMiniText(msg);
 
   if (msg.state === 'empty') { showOnly('empty'); return; }
   if (msg.state === 'no-text') { showOnly('no-text'); return; }

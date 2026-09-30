@@ -15,6 +15,12 @@ Select a text layer, or a frame containing one or more text layers, and the plug
 It updates live as you resize the frame or text box, or change the selection — no re-running
 needed.
 
+## Minimize
+
+Click the **–** button (top-right of the panel) to shrink it to a 24px-tall bar showing just
+`<selected layer name>: N characters`, with a button to expand back to the full view. Analysis
+keeps running while minimized, so the count stays live if you keep resizing.
+
 ## How wrap-aware measurement works
 
 Figma's plugin API doesn't expose where a line visually wraps — that's purely a rendering detail.

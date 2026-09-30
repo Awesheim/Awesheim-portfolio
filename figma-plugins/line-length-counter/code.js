@@ -10,7 +10,17 @@
 // gives pixel-exact wrap points (kerning, shaping, everything) instead of
 // an approximation from a browser font.
 
-figma.showUI(__html__, { width: 340, height: 420, themeColors: true });
+var FULL_WIDTH = 340;
+var FULL_HEIGHT = 420;
+var MIN_HEIGHT = 24;
+
+figma.showUI(__html__, { width: FULL_WIDTH, height: FULL_HEIGHT, themeColors: true });
+
+figma.ui.onmessage = function (msg) {
+  if (msg && msg.type === 'set-minimized') {
+    figma.ui.resize(FULL_WIDTH, msg.minimized ? MIN_HEIGHT : FULL_HEIGHT);
+  }
+};
 
 var SCRATCH_NAME = '⚠️ Line Length Counter scratch node (safe to delete)';
 var scratchNode = null;
@@ -149,6 +159,7 @@ async function analyzeTextNode(tn) {
 
 async function analyze() {
   var sel = figma.currentPage.selection;
+  var selectionLabel = sel.length === 1 ? sel[0].name : (sel.length + ' layers');
 
   if (sel.length === 0) {
     figma.ui.postMessage({ type: 'result', state: 'empty' });
@@ -159,7 +170,7 @@ async function analyze() {
   for (var i = 0; i < sel.length; i++) collectTextNodes(sel[i], textNodes);
 
   if (!textNodes.length) {
-    figma.ui.postMessage({ type: 'result', state: 'no-text' });
+    figma.ui.postMessage({ type: 'result', state: 'no-text', selectionLabel: selectionLabel });
     return;
   }
 
@@ -179,6 +190,7 @@ async function analyze() {
   figma.ui.postMessage({
     type: 'result',
     state: 'ok',
+    selectionLabel: selectionLabel,
     textNodeCount: textNodes.length,
     best: best,
     nodes: results
