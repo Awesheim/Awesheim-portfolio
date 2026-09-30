@@ -213,18 +213,24 @@ function requestAnalyzeDebounced() {
 }
 
 figma.on('selectionchange', requestAnalyze);
-figma.on('documentchange', function (event) {
-  // Our own measurement passes mutate the scratch node hundreds of times,
-  // which themselves fire documentchange — filter those out, or every
-  // analyze() would immediately queue another one, forever.
-  var relevant = (event.documentChanges || []).some(function (change) {
-    var id = change.id || (change.node && change.node.id);
-    return !scratchNode || id !== scratchNode.id;
-  });
-  if (relevant && figma.currentPage.selection.length > 0) requestAnalyzeDebounced();
-});
 figma.on('close', function () {
   if (scratchNode && !scratchNode.removed) scratchNode.remove();
+});
+
+// documentchange is document-wide, so in dynamic-page access mode Figma
+// requires every page to be loaded first. selectionchange/close don't need
+// this, so they're registered above without waiting on it.
+figma.loadAllPagesAsync().then(function () {
+  figma.on('documentchange', function (event) {
+    // Our own measurement passes mutate the scratch node hundreds of times,
+    // which themselves fire documentchange — filter those out, or every
+    // analyze() would immediately queue another one, forever.
+    var relevant = (event.documentChanges || []).some(function (change) {
+      var id = change.id || (change.node && change.node.id);
+      return !scratchNode || id !== scratchNode.id;
+    });
+    if (relevant && figma.currentPage.selection.length > 0) requestAnalyzeDebounced();
+  });
 });
 
 requestAnalyze();
