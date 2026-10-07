@@ -18,8 +18,17 @@ needed.
 ## Minimize
 
 Click the **–** button (top-right of the panel) to shrink it to a 24px-tall bar showing just
-`<selected layer name>: N characters`, with a button to expand back to the full view. Analysis
-keeps running while minimized, so the count stays live if you keep resizing.
+`<selected layer name>: N characters` (layer name truncated to 20 characters), with a button to
+expand back to the full view. Analysis keeps running while minimized, so the count stays live if
+you keep resizing.
+
+Note: this bar is our own content, sitting below Figma's native plugin window header (icon, plugin
+name, close button). That native header is drawn by Figma itself, outside anything a plugin's UI
+controls — its title text can only be set once, when the UI is first created (and changing it
+means fully destroying and recreating the iframe, which isn't worth the flicker for a value that
+updates live), and Figma's plugin window chrome has no native maximize button at all, for any
+plugin. So minimizing can't be made to replace or merge with that native header — the 24px bar
+above is as compact as the plugin's own content area gets.
 
 ## How wrap-aware measurement works
 

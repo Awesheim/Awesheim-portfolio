@@ -248,13 +248,21 @@ function setMinimized(next) {
 els.minimizeBtn.addEventListener('click', function () { setMinimized(true); });
 els.expandBtn.addEventListener('click', function () { setMinimized(false); });
 
+var MINI_NAME_LIMIT = 20;
+
+function truncateName(name) {
+  var chars = Array.from(name);
+  if (chars.length <= MINI_NAME_LIMIT) return name;
+  return chars.slice(0, MINI_NAME_LIMIT).join('') + '…';
+}
+
 function updateMiniText(msg) {
   if (msg.type === 'error') { els.miniText.textContent = 'Error measuring text'; return; }
   if (msg.state === 'empty') { els.miniText.textContent = 'No selection'; return; }
-  if (msg.state === 'no-text') { els.miniText.innerHTML = '<b>' + escapeHtml(msg.selectionLabel) + '</b>: no text'; return; }
+  if (msg.state === 'no-text') { els.miniText.innerHTML = '<b>' + escapeHtml(truncateName(msg.selectionLabel)) + '</b>: no text'; return; }
   if (msg.state === 'ok') {
     var count = msg.best ? (msg.best.length + ' characters') : '—';
-    els.miniText.innerHTML = '<b>' + escapeHtml(msg.selectionLabel) + '</b>: ' + count;
+    els.miniText.innerHTML = '<b>' + escapeHtml(truncateName(msg.selectionLabel)) + '</b>: ' + count;
   }
 }
 
